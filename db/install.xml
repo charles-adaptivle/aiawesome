@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/aiawesome/db" VERSION="2025092400" COMMENT="XMLDB file for Moodle local/aiawesome"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_aiawesome_logs" COMMENT="Stores usage statistics and metadata for AI chat interactions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The ID of the user who initiated the chat"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The ID of the course context where the chat occurred"/>
+        <FIELD NAME="sessionid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="A session identifier for grouping related chat interactions"/>
+        <FIELD NAME="bytes_up" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Number of bytes sent to the AI service"/>
+        <FIELD NAME="bytes_down" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Number of bytes received from the AI service"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="pending" SEQUENCE="false" COMMENT="Status of the chat interaction"/>
+        <FIELD NAME="error" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Error message if the interaction failed"/>
+        <FIELD NAME="content" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Conversation content (only if logging enabled)"/>
+        <FIELD NAME="createdat" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp when the interaction was created"/>
+        <FIELD NAME="duration_ms" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Duration of the interaction in milliseconds"/>
+        <FIELD NAME="ttff_ms" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time to first token in milliseconds"/>
+        <FIELD NAME="tokens_used" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Total tokens consumed"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="sessionid" UNIQUE="false" FIELDS="sessionid"/>
+        <INDEX NAME="createdat" UNIQUE="false" FIELDS="createdat"/>
+        <INDEX NAME="status" UNIQUE="false" FIELDS="status"/>
+        <INDEX NAME="userid_createdat" UNIQUE="false" FIELDS="userid, createdat"/>
+        <INDEX NAME="courseid_createdat" UNIQUE="false" FIELDS="courseid, createdat"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

@@ -1,0 +1,435 @@
+/**
+ * AI Awesome Plugin Styles
+ *
+ * @package    local_aiawesome
+ * @copyright  2025 Charles Horton <charles@adaptivle.co.uk>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/* Drawer Styles */
+.aiawesome-drawer {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+    border-left: 1px solid #dee2e6;
+}
+
+@media (max-width: 767px) {
+    .aiawesome-drawer {
+        width: 100vw !important;
+    }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .aiawesome-drawer {
+        transition: none !important;
+    }
+    
+    .aiawesome-cursor {
+        animation: none !important;
+    }
+}
+
+/* RTL Support */
+[dir="rtl"] .aiawesome-drawer {
+    right: auto;
+    left: 0;
+    transform: translateX(-100%);
+    border-right: 1px solid #dee2e6;
+    border-left: none;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+[dir="rtl"] .aiawesome-drawer.open {
+    transform: translateX(0);
+}
+
+/* App Container */
+.aiawesome-app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #ffffff;
+}
+
+/* Header */
+.aiawesome-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+    background: #f8f9fa;
+    flex-shrink: 0;
+}
+
+.aiawesome-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.aiawesome-header-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.aiawesome-header-actions .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+/* Messages Container */
+.aiawesome-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    background: #ffffff;
+}
+
+/* Welcome Message */
+.aiawesome-welcome {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #6c757d;
+}
+
+.aiawesome-welcome-icon {
+    margin-bottom: 1rem;
+    color: #007bff;
+    opacity: 0.7;
+}
+
+.aiawesome-welcome h4 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.aiawesome-welcome p {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+/* Messages */
+.aiawesome-message {
+    margin-bottom: 1.5rem;
+}
+
+.aiawesome-message--user {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.aiawesome-message--user .aiawesome-message-content {
+    background: #007bff;
+    color: white;
+    border-radius: 1rem 1rem 0.25rem 1rem;
+    max-width: 80%;
+}
+
+.aiawesome-message--assistant {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.aiawesome-message--assistant .aiawesome-message-content {
+    background: #f8f9fa;
+    color: #333;
+    border-radius: 1rem 1rem 1rem 0.25rem;
+    max-width: 85%;
+    border: 1px solid #e9ecef;
+}
+
+.aiawesome-message-content {
+    padding: 0.75rem 1rem;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    position: relative;
+}
+
+/* Typing Cursor */
+.aiawesome-cursor {
+    color: #007bff;
+    animation: aiawesome-blink 1s infinite;
+    font-weight: bold;
+}
+
+@keyframes aiawesome-blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* Message Status */
+.aiawesome-message-error {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: #f8d7da;
+    color: #721c24;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+}
+
+.aiawesome-message-error i {
+    margin-right: 0.5rem;
+}
+
+.aiawesome-message-stopped {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: #fff3cd;
+    color: #856404;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+}
+
+.aiawesome-message-stopped i {
+    margin-right: 0.5rem;
+}
+
+.aiawesome-message-time {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+    text-align: right;
+}
+
+.aiawesome-message--user .aiawesome-message-time {
+    text-align: left;
+}
+
+/* References */
+.aiawesome-references {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.aiawesome-references h6 {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.aiawesome-references ul {
+    margin: 0;
+    padding-left: 1rem;
+    list-style-type: none;
+}
+
+.aiawesome-references li {
+    margin-bottom: 0.25rem;
+}
+
+.aiawesome-references li:before {
+    content: "🔗";
+    margin-right: 0.5rem;
+}
+
+.aiawesome-references a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.aiawesome-references a:hover {
+    text-decoration: underline;
+}
+
+/* Error Display */
+.aiawesome-error {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid #dee2e6;
+    background: #ffffff;
+    flex-shrink: 0;
+}
+
+.aiawesome-error .alert {
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+.aiawesome-error .alert i {
+    margin-right: 0.5rem;
+}
+
+/* Input Form */
+.aiawesome-input-form {
+    border-top: 1px solid #dee2e6;
+    background: #ffffff;
+    flex-shrink: 0;
+}
+
+.aiawesome-input-container {
+    display: flex;
+    align-items: flex-end;
+    padding: 1rem;
+    gap: 0.75rem;
+}
+
+.aiawesome-input {
+    flex: 1;
+    min-height: 2.5rem;
+    max-height: 6rem;
+    resize: none;
+    border-radius: 1.25rem;
+    border: 1px solid #ced4da;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.aiawesome-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.aiawesome-input:disabled {
+    background-color: #f8f9fa;
+    opacity: 0.6;
+}
+
+.aiawesome-input-actions {
+    display: flex;
+    align-items: center;
+}
+
+.aiawesome-input-actions .btn {
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    font-size: 0.9rem;
+}
+
+.aiawesome-input-actions .btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.aiawesome-input-actions .btn-primary:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.aiawesome-input-actions .btn-outline-danger {
+    color: #dc3545;
+    border: 1px solid #dc3545;
+}
+
+.aiawesome-input-actions .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.aiawesome-input-actions .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Toggle Button States */
+[data-aiawesome-toggle].active {
+    background-color: rgba(0, 123, 255, 0.1) !important;
+    color: #007bff !important;
+}
+
+/* Floating Toggle Button */
+.aiawesome-floating-toggle:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Loading State */
+.aiawesome-input .fa-spinner {
+    animation: fa-spin 1s infinite linear;
+}
+
+@keyframes fa-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Scrollbar Styles */
+.aiawesome-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.aiawesome-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.aiawesome-messages::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.aiawesome-messages::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Dark Theme Support (if Moodle has dark theme) */
+@media (prefers-color-scheme: dark) {
+    .theme-dark .aiawesome-drawer,
+    .theme-dark .aiawesome-app {
+        background: #2d3748;
+        color: #e2e8f0;
+        border-color: #4a5568;
+    }
+    
+    .theme-dark .aiawesome-header {
+        background: #1a202c;
+        border-color: #4a5568;
+    }
+    
+    .theme-dark .aiawesome-header h3 {
+        color: #e2e8f0;
+    }
+    
+    .theme-dark .aiawesome-message--assistant .aiawesome-message-content {
+        background: #4a5568;
+        color: #e2e8f0;
+        border-color: #718096;
+    }
+    
+    .theme-dark .aiawesome-input {
+        background: #4a5568;
+        color: #e2e8f0;
+        border-color: #718096;
+    }
+    
+    .theme-dark .aiawesome-input:focus {
+        border-color: #63b3ed;
+        box-shadow: 0 0 0 0.2rem rgba(99, 179, 237, 0.25);
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .aiawesome-message--user .aiawesome-message-content {
+        background: #000;
+        color: #fff;
+        border: 2px solid #000;
+    }
+    
+    .aiawesome-message--assistant .aiawesome-message-content {
+        background: #fff;
+        color: #000;
+        border: 2px solid #000;
+    }
+    
+    .aiawesome-input {
+        border: 2px solid #000;
+    }
+    
+    .aiawesome-input:focus {
+        border-color: #0066cc;
+        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.5);
+    }
+}
