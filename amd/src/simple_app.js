@@ -280,8 +280,10 @@ function setupEventHandlers(container, strings) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
                 body: JSON.stringify(requestData),
+                credentials: 'include',
                 signal: currentAbortController.signal
             });
 
@@ -309,8 +311,9 @@ function setupEventHandlers(container, strings) {
                     if (line.startsWith('data: ')) {
                         try {
                             const data = JSON.parse(line.substring(6));
-                            if (data.content) {
-                                content += data.content;
+                            // Handle OpenAI streaming format
+                            if (data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content) {
+                                content += data.choices[0].delta.content;
                                 contentDiv.textContent = content;
                                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
                             }

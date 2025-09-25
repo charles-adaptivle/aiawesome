@@ -22,12 +22,27 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    header('Access-Control-Allow-Origin: https://ivan.dev.test'); // or '*'
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Moodle-Sesskey');
+    header('Access-Control-Allow-Methods: POST, OPTIONS');
+    http_response_code(204);
+    exit;
+}
+
+define('AJAX_SCRIPT', true);
+
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->libdir . '/filelib.php');
 
 use local_aiawesome\api_service;
 use local_aiawesome\crypto_utils;
 use local_aiawesome\logging_service;
+
+// Add CORS headers for the actual request
+header('Access-Control-Allow-Origin: https://ivan.dev.test');
+header('Access-Control-Allow-Credentials: true');
 
 // Require login and capability.
 require_login();
@@ -58,8 +73,8 @@ if (!$input || !isset($input['query']) || !isset($input['session'])) {
     exit;
 }
 
-// Validate CSRF token.
-if (!confirm_sesskey()) {
+// Validate CSRF token from JSON payload.
+if (!isset($input['sesskey']) || $input['sesskey'] !== sesskey()) {
     http_response_code(403);
     header('Content-Type: application/json');
     echo json_encode(['error' => 'Invalid session key']);
