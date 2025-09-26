@@ -139,3 +139,53 @@ $string['privacy:metadata:external:aiservice:query'] = 'The user\'s question or 
 $string['cachedef_token_cache'] = 'Cache for OAuth2 access tokens to avoid repeated authentication requests.';
 $string['cachedef_config_cache'] = 'Cache for plugin configuration to improve performance.';
 $string['cachedef_rate_limit_cache'] = 'Cache for tracking rate limits per user.';
+
+// Provider selections.
+$string['provider_openai'] = 'OpenAI (Direct API)';
+$string['provider_custom_oauth'] = 'Custom OAuth Service';
+$string['provider_digitalocean'] = 'DigitalOcean (Custom Endpoint)';
+
+$string['setting_ai_provider'] = 'AI Provider';
+$string['setting_ai_provider_desc'] = 'Choose which AI provider to use for chat completions.';
+
+// Custom OAuth settings.
+$string['settings_header_custom_oauth'] = 'Custom OAuth Service Configuration';
+$string['settings_header_custom_oauth_desc'] = 'Connect to a third-party AI service using OAuth2 client-credentials flow (e.g., Azure OpenAI, enterprise AI gateway).';
+
+$string['setting_oauth_base_url'] = 'AI Service Base URL';
+$string['setting_oauth_base_url_desc'] = 'The base URL for your OAuth-protected AI service API endpoint.';
+
+$string['setting_oauth_token_url'] = 'OAuth Token URL';
+$string['setting_oauth_token_url_desc'] = 'The OAuth2 token endpoint for client credentials flow.';
+
+$string['setting_oauth_client_id'] = 'OAuth Client ID';
+$string['setting_oauth_client_id_desc'] = 'Client ID for OAuth2 authentication.';
+
+$string['setting_oauth_client_secret'] = 'OAuth Client Secret';
+$string['setting_oauth_client_secret_desc'] = 'Client secret for OAuth2 authentication.';
+
+$string['setting_oauth_app_id'] = 'Application ID';
+$string['setting_oauth_app_id_desc'] = 'Application identifier sent with requests to the custom service.';
+
+// DigitalOcean settings.
+$string['settings_header_digitalocean'] = 'DigitalOcean Configuration';
+$string['settings_header_digitalocean_desc'] = 'Configure your custom DigitalOcean-hosted AI model endpoint.';
+
+$string['setting_digitalocean_endpoint'] = 'Endpoint URL';
+$string['setting_digitalocean_endpoint_desc'] = 'Full URL to your AI model endpoint (e.g., https://your-droplet.example.com/v1/chat/completions). Must support OpenAI-compatible API format.';
+
+$string['setting_digitalocean_api_key'] = 'API Key (Optional)';
+$string['setting_digitalocean_api_key_desc'] = 'API key for authentication if your endpoint requires it. Leave blank if your endpoint does not require authentication.';
+
+$string['setting_digitalocean_model'] = 'Model Name';
+$string['setting_digitalocean_model_desc'] = 'Name of the AI model deployed on your endpoint (e.g., llama3.1:8b, deepseek-r1:7b, codellama:7b).';
+
+$string['setting_digitalocean_headers'] = 'Custom Headers (Optional)';
+$string['setting_digitalocean_headers_desc'] = 'Additional HTTP headers to send with requests, one per line in "Header-Name: value" format. Use this for custom authentication or configuration requirements.';
+
+// Connection test messages.
+$string['digitalocean_test_success'] = 'DigitalOcean connection test successful! Model: {$a->model}, Response time: {$a->response_time}ms';
+$string['digitalocean_test_failed'] = 'DigitalOcean connection test failed: {$a}';
+$string['digitalocean_test_connectivity_failed'] = 'Cannot reach DigitalOcean endpoint. Please check the URL and ensure your droplet is running.';
+$string['digitalocean_test_auth_failed'] = 'Authentication failed. Please check your API key configuration.';
+$string['digitalocean_test_model_failed'] = 'Model "{$a}" is not available on your endpoint. Please check your model configuration.';

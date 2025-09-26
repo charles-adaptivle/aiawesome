@@ -29,12 +29,12 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filelib.php');
 
 /**
- * API service class for handling both OAuth and direct API token authentication.
+ * API service class for handling multiple AI providers and authentication methods.
  */
 class api_service {
 
-    /** @var string Authentication mode: 'oauth' or 'token' */
-    private $auth_mode;
+    /** @var string AI provider: 'openai', 'custom_oauth', or 'digitalocean' */
+    private $provider;
 
     /** @var oauth_service OAuth service instance */
     private $oauth_service;
@@ -47,9 +47,10 @@ class api_service {
      */
     public function __construct() {
         $this->configcache = \cache::make('local_aiawesome', 'config_cache');
-        $this->auth_mode = get_config('local_aiawesome', 'auth_mode') ?: 'oauth';
+        $this->provider = get_config('local_aiawesome', 'ai_provider') ?: 'openai';
         
-        if ($this->auth_mode === 'oauth') {
+        // Initialize OAuth service for custom_oauth provider
+        if ($this->provider === 'custom_oauth') {
             $this->oauth_service = new oauth_service();
         }
     }
@@ -60,17 +61,58 @@ class api_service {
      * @return string|false Authorization header value or false
      */
     public function get_auth_header() {
-        if ($this->auth_mode === 'oauth') {
-            return $this->oauth_service->get_auth_header();
-        } else {
-            // Token mode (e.g., OpenAI).
-            $api_key = get_config('local_aiawesome', 'openai_api_key');
-            if (empty($api_key)) {
-                debugging('AI Awesome: OpenAI API key not configured', DEBUG_DEVELOPER);
+        switch ($this->provider) {
+            case 'openai':
+                return $this->get_openai_auth_header();
+            case 'custom_oauth':
+                return $this->get_custom_oauth_auth_header();
+            case 'digitalocean':
+                return $this->get_digitalocean_auth_header();
+            default:
+                debugging('AI Awesome: Unknown provider: ' . $this->provider, DEBUG_DEVELOPER);
                 return false;
-            }
+        }
+    }
+
+    /**
+     * Get OpenAI authorization header (direct API key).
+     *
+     * @return string|false Authorization header value or false
+     */
+    private function get_openai_auth_header() {
+        $api_key = get_config('local_aiawesome', 'openai_api_key');
+        if (empty($api_key)) {
+            debugging('AI Awesome: OpenAI API key not configured', DEBUG_DEVELOPER);
+            return false;
+        }
+        return 'Bearer ' . $api_key;
+    }
+
+    /**
+     * Get Custom OAuth authorization header.
+     *
+     * @return string|false Authorization header value or false
+     */
+    private function get_custom_oauth_auth_header() {
+        if (!$this->oauth_service) {
+            debugging('AI Awesome: OAuth service not initialized', DEBUG_DEVELOPER);
+            return false;
+        }
+        return $this->oauth_service->get_auth_header();
+    }
+
+    /**
+     * Get DigitalOcean authorization header.
+     *
+     * @return string|false Authorization header value or false
+     */
+    private function get_digitalocean_auth_header() {
+        $api_key = get_config('local_aiawesome', 'digitalocean_api_key');
+        if (!empty($api_key)) {
             return 'Bearer ' . $api_key;
         }
+        // No authentication required for some endpoints
+        return '';
     }
 
     /**
@@ -79,17 +121,61 @@ class api_service {
      * @return string|false API endpoint URL or false
      */
     public function get_api_endpoint() {
-        if ($this->auth_mode === 'oauth') {
-            $config = $this->get_oauth_config();
-            if (!$config || empty($config->base_url)) {
+        switch ($this->provider) {
+            case 'openai':
+                return $this->get_openai_endpoint();
+            case 'custom_oauth':
+                return $this->get_custom_oauth_endpoint();
+            case 'digitalocean':
+                return $this->get_digitalocean_endpoint();
+            default:
+                debugging('AI Awesome: Unknown provider: ' . $this->provider, DEBUG_DEVELOPER);
                 return false;
-            }
-            return rtrim($config->base_url, '/') . '/chat/completions';
-        } else {
-            // OpenAI mode.
-            $api_base = get_config('local_aiawesome', 'openai_api_base') ?: 'https://api.openai.com/v1';
-            return rtrim($api_base, '/') . '/chat/completions';
         }
+    }
+
+    /**
+     * Get OpenAI API endpoint.
+     *
+     * @return string|false API endpoint URL or false
+     */
+    private function get_openai_endpoint() {
+        return 'https://api.openai.com/v1/chat/completions';
+    }
+
+    /**
+     * Get Custom OAuth API endpoint.
+     *
+     * @return string|false API endpoint URL or false
+     */
+    private function get_custom_oauth_endpoint() {
+        $base_url = get_config('local_aiawesome', 'oauth_base_url');
+        if (empty($base_url)) {
+            debugging('AI Awesome: OAuth base URL not configured', DEBUG_DEVELOPER);
+            return false;
+        }
+        return rtrim($base_url, '/') . '/chat/completions';
+    }
+
+    /**
+     * Get DigitalOcean API endpoint.
+     *
+     * @return string|false API endpoint URL or false
+     */
+    private function get_digitalocean_endpoint() {
+        $endpoint = get_config('local_aiawesome', 'digitalocean_endpoint');
+        if (empty($endpoint)) {
+            debugging('AI Awesome: DigitalOcean endpoint not configured', DEBUG_DEVELOPER);
+            return false;
+        }
+
+        // Ensure proper endpoint format
+        $endpoint = rtrim($endpoint, '/');
+        if (strpos($endpoint, '/v1/chat/completions') === false) {
+            $endpoint .= '/v1/chat/completions';
+        }
+
+        return $endpoint;
     }
 
     /**
@@ -100,17 +186,70 @@ class api_service {
     public function get_additional_headers() {
         $headers = ['Content-Type' => 'application/json'];
         
-        if ($this->auth_mode === 'token') {
-            // OpenAI specific headers.
-            $organization = get_config('local_aiawesome', 'openai_organization');
-            $project = get_config('local_aiawesome', 'openai_project');
-            
-            if (!empty($organization)) {
-                $headers['OpenAI-Organization'] = $organization;
-            }
-            
-            if (!empty($project)) {
-                $headers['OpenAI-Project'] = $project;
+        switch ($this->provider) {
+            case 'openai':
+                return array_merge($headers, $this->get_openai_additional_headers());
+            case 'custom_oauth':
+                return array_merge($headers, $this->get_custom_oauth_additional_headers());
+            case 'digitalocean':
+                return array_merge($headers, $this->get_digitalocean_additional_headers());
+            default:
+                return $headers;
+        }
+    }
+
+    /**
+     * Get OpenAI-specific additional headers.
+     *
+     * @return array Additional headers
+     */
+    private function get_openai_additional_headers() {
+        $headers = [];
+        
+        // OpenAI specific headers.
+        $organization = get_config('local_aiawesome', 'openai_organization');
+        $project = get_config('local_aiawesome', 'openai_project');
+        
+        if (!empty($organization)) {
+            $headers['OpenAI-Organization'] = $organization;
+        }
+        
+        if (!empty($project)) {
+            $headers['OpenAI-Project'] = $project;
+        }
+        
+        return $headers;
+    }
+
+    /**
+     * Get Custom OAuth-specific additional headers.
+     *
+     * @return array Additional headers
+     */
+    private function get_custom_oauth_additional_headers() {
+        // Return empty array - OAuth service handles authentication headers
+        return [];
+    }
+
+    /**
+     * Get DigitalOcean-specific additional headers.
+     *
+     * @return array Additional headers
+     */
+    private function get_digitalocean_additional_headers() {
+        $headers = [];
+        
+        // Parse custom headers from configuration
+        $custom_headers = get_config('local_aiawesome', 'digitalocean_headers');
+        if (!empty($custom_headers)) {
+            $lines = explode("\n", $custom_headers);
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if (empty($line) || strpos($line, ':') === false) {
+                    continue;
+                }
+                [$name, $value] = explode(':', $line, 2);
+                $headers[trim($name)] = trim($value);
             }
         }
         
@@ -125,54 +264,116 @@ class api_service {
      * @return array Request payload
      */
     public function prepare_chat_payload($message, $context = []) {
+        switch ($this->provider) {
+            case 'openai':
+                return $this->prepare_openai_payload($message, $context);
+            case 'custom_oauth':
+                return $this->prepare_custom_oauth_payload($message, $context);
+            case 'digitalocean':
+                return $this->prepare_digitalocean_payload($message, $context);
+            default:
+                throw new \Exception('Unknown AI provider: ' . $this->provider);
+        }
+    }
+
+    /**
+     * Prepare OpenAI-specific request payload.
+     *
+     * @param string $message User message
+     * @param array $context Additional context information
+     * @return array Request payload
+     */
+    private function prepare_openai_payload($message, $context = []) {
+        $config = $this->get_chat_config();
+        $model = get_config('local_aiawesome', 'openai_model') ?: 'gpt-4o-mini';
+        
+        $system_message = 'You are a helpful AI assistant integrated into a Moodle learning management system. ';
+        if (!empty($context['courseName'])) {
+            $system_message .= 'The user is currently in the course: "' . $context['courseName'] . '". ';
+        }
+        $system_message .= 'Provide helpful, educational responses that are appropriate for the learning context.';
+        
+        return [
+            'model' => $model,
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => $system_message
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $message
+                ]
+            ],
+            'max_tokens' => (int)$config->max_tokens,
+            'temperature' => (float)$config->temperature,
+            'stream' => true,
+        ];
+    }
+
+    /**
+     * Prepare Custom OAuth service-specific request payload.
+     *
+     * @param string $message User message
+     * @param array $context Additional context information
+     * @return array Request payload
+     */
+    private function prepare_custom_oauth_payload($message, $context = []) {
         $config = $this->get_chat_config();
         
-        if ($this->auth_mode === 'oauth') {
-            // Custom service format (adjust as needed).
-            return [
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => 'You are a helpful AI assistant for a Moodle learning management system. ' .
-                                   'Provide helpful, educational responses based on the provided context.'
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => $message
-                    ]
+        // Custom service format (adjust as needed for your specific OAuth service)
+        return [
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => 'You are a helpful AI assistant for a Moodle learning management system. ' .
+                               'Provide helpful, educational responses based on the provided context.'
                 ],
-                'max_tokens' => (int)$config->max_tokens,
-                'temperature' => (float)$config->temperature,
-                'context' => $context,
-                'app_id' => $config->app_id,
-            ];
-        } else {
-            // OpenAI format.
-            $model = get_config('local_aiawesome', 'openai_model') ?: 'gpt-4o-mini';
-            
-            $system_message = 'You are a helpful AI assistant integrated into a Moodle learning management system. ';
-            if (!empty($context['courseName'])) {
-                $system_message .= 'The user is currently in the course: "' . $context['courseName'] . '". ';
-            }
-            $system_message .= 'Provide helpful, educational responses that are appropriate for the learning context.';
-            
-            return [
-                'model' => $model,
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => $system_message
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => $message
-                    ]
-                ],
-                'max_tokens' => (int)$config->max_tokens,
-                'temperature' => (float)$config->temperature,
-                'stream' => true, // Enable streaming for real-time responses.
-            ];
+                [
+                    'role' => 'user',
+                    'content' => $message
+                ]
+            ],
+            'max_tokens' => (int)$config->max_tokens,
+            'temperature' => (float)$config->temperature,
+            'context' => $context,
+            'app_id' => get_config('local_aiawesome', 'oauth_app_id'),
+        ];
+    }
+
+    /**
+     * Prepare DigitalOcean-specific request payload.
+     *
+     * @param string $message User message
+     * @param array $context Additional context information
+     * @return array Request payload
+     */
+    private function prepare_digitalocean_payload($message, $context = []) {
+        $config = $this->get_chat_config();
+        $model = get_config('local_aiawesome', 'digitalocean_model') ?: 'llama3.1:8b';
+        
+        $system_message = 'You are a helpful AI assistant integrated into a Moodle learning management system. ';
+        if (!empty($context['courseName'])) {
+            $system_message .= 'The user is currently in the course: "' . $context['courseName'] . '". ';
         }
+        $system_message .= 'Provide helpful, educational responses that are appropriate for the learning context.';
+        
+        return [
+            'model' => $model,
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => $system_message
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $message
+                ]
+            ],
+            'max_tokens' => (int)$config->max_tokens,
+            'temperature' => (float)$config->temperature,
+            'stream' => true,
+        ];
     }
 
     /**
@@ -245,8 +446,8 @@ class api_service {
         
         if (!$config) {
             $config = (object) [
-                'base_url' => get_config('local_aiawesome', 'base_url'),
-                'app_id' => get_config('local_aiawesome', 'app_id'),
+                'base_url' => get_config('local_aiawesome', 'oauth_base_url'),
+                'app_id' => get_config('local_aiawesome', 'oauth_app_id'),
             ];
             
             $this->configcache->set('oauth_config', $config);
@@ -267,7 +468,6 @@ class api_service {
             $config = (object) [
                 'max_tokens' => get_config('local_aiawesome', 'max_tokens') ?: 2000,
                 'temperature' => get_config('local_aiawesome', 'temperature') ?: 0.7,
-                'app_id' => get_config('local_aiawesome', 'app_id'),
             ];
             
             $this->configcache->set('chat_config', $config);
@@ -284,9 +484,8 @@ class api_service {
     public function test_connection() {
         $test_payload = $this->prepare_chat_payload('Hello, this is a test message.');
         
-        // For testing, we'll send a simple request.
-        if ($this->auth_mode === 'token') {
-            // Remove streaming for test.
+        // For testing, remove streaming for OpenAI and DigitalOcean providers.
+        if (in_array($this->provider, ['openai', 'digitalocean'])) {
             $test_payload['stream'] = false;
         }
         
@@ -296,13 +495,13 @@ class api_service {
             return [
                 'success' => true,
                 'message' => 'API connection successful',
-                'mode' => $this->auth_mode
+                'mode' => $this->provider
             ];
         } else {
             return [
                 'success' => false,
                 'error' => $result['error'] ?? 'Unknown error',
-                'mode' => $this->auth_mode
+                'mode' => $this->provider
             ];
         }
     }

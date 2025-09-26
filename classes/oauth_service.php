@@ -184,11 +184,11 @@ class oauth_service {
         
         if (!$config) {
             $config = (object) [
-                'token_url' => get_config('local_aiawesome', 'token_url'),
-                'client_id' => get_config('local_aiawesome', 'client_id'),
-                'client_secret' => get_config('local_aiawesome', 'client_secret'),
-                'base_url' => get_config('local_aiawesome', 'base_url'),
-                'app_id' => get_config('local_aiawesome', 'app_id'),
+                'token_url' => get_config('local_aiawesome', 'oauth_token_url'),
+                'client_id' => get_config('local_aiawesome', 'oauth_client_id'),
+                'client_secret' => get_config('local_aiawesome', 'oauth_client_secret'),
+                'base_url' => get_config('local_aiawesome', 'oauth_base_url'),
+                'app_id' => get_config('local_aiawesome', 'oauth_app_id'),
             ];
             
             $this->configcache->set('oauth_config', $config);

@@ -55,59 +55,21 @@ if ($hassiteconfig) {
         ''
     ));
 
-    // Authentication mode selection.
-    $auth_modes = [
-        'oauth' => get_string('auth_mode_oauth', 'local_aiawesome'),
-        'token' => get_string('auth_mode_token', 'local_aiawesome'),
+    // AI Provider selection.
+    $providers = [
+        'openai' => get_string('provider_openai', 'local_aiawesome'),
+        'custom_oauth' => get_string('provider_custom_oauth', 'local_aiawesome'),
+        'digitalocean' => get_string('provider_digitalocean', 'local_aiawesome'),
     ];
     $settings->add(new admin_setting_configselect(
-        'local_aiawesome/auth_mode',
-        get_string('setting_auth_mode', 'local_aiawesome'),
-        get_string('setting_auth_mode_desc', 'local_aiawesome'),
-        'oauth',
-        $auth_modes
+        'local_aiawesome/ai_provider',
+        get_string('setting_ai_provider', 'local_aiawesome'),
+        get_string('setting_ai_provider_desc', 'local_aiawesome'),
+        'openai',
+        $providers
     ));
 
-    // OAuth Configuration (shown when OAuth mode is selected).
-    $settings->add(new admin_setting_configtext(
-        'local_aiawesome/base_url',
-        get_string('setting_base_url', 'local_aiawesome'),
-        get_string('setting_base_url_desc', 'local_aiawesome'),
-        '',
-        PARAM_URL
-    ));
-
-    $settings->add(new admin_setting_configtext(
-        'local_aiawesome/app_id',
-        get_string('setting_app_id', 'local_aiawesome'),
-        get_string('setting_app_id_desc', 'local_aiawesome'),
-        '',
-        PARAM_ALPHANUMEXT
-    ));
-
-    $settings->add(new admin_setting_configtext(
-        'local_aiawesome/token_url',
-        get_string('setting_token_url', 'local_aiawesome'),
-        get_string('setting_token_url_desc', 'local_aiawesome'),
-        '',
-        PARAM_URL
-    ));
-
-    $settings->add(new admin_setting_configpasswordunmask(
-        'local_aiawesome/client_id',
-        get_string('setting_client_id', 'local_aiawesome'),
-        get_string('setting_client_id_desc', 'local_aiawesome'),
-        ''
-    ));
-
-    $settings->add(new admin_setting_configpasswordunmask(
-        'local_aiawesome/client_secret',
-        get_string('setting_client_secret', 'local_aiawesome'),
-        get_string('setting_client_secret_desc', 'local_aiawesome'),
-        ''
-    ));
-
-    // OpenAI API Configuration (shown when Token mode is selected).
+    // === OpenAI Configuration ===
     $settings->add(new admin_setting_heading(
         'local_aiawesome/openai_header',
         get_string('settings_header_openai', 'local_aiawesome'),
@@ -119,14 +81,6 @@ if ($hassiteconfig) {
         get_string('setting_openai_api_key', 'local_aiawesome'),
         get_string('setting_openai_api_key_desc', 'local_aiawesome'),
         ''
-    ));
-
-    $settings->add(new admin_setting_configtext(
-        'local_aiawesome/openai_api_base',
-        get_string('setting_openai_api_base', 'local_aiawesome'),
-        get_string('setting_openai_api_base_desc', 'local_aiawesome'),
-        'https://api.openai.com/v1',
-        PARAM_URL
     ));
 
     $settings->add(new admin_setting_configtext(
@@ -149,6 +103,89 @@ if ($hassiteconfig) {
         'local_aiawesome/openai_project',
         get_string('setting_openai_project', 'local_aiawesome'),
         get_string('setting_openai_project_desc', 'local_aiawesome'),
+        '',
+        PARAM_TEXT
+    ));
+
+    // === Custom OAuth Service Configuration ===
+    $settings->add(new admin_setting_heading(
+        'local_aiawesome/custom_oauth_header',
+        get_string('settings_header_custom_oauth', 'local_aiawesome'),
+        get_string('settings_header_custom_oauth_desc', 'local_aiawesome')
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'local_aiawesome/oauth_base_url',
+        get_string('setting_oauth_base_url', 'local_aiawesome'),
+        get_string('setting_oauth_base_url_desc', 'local_aiawesome'),
+        '',
+        PARAM_URL
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'local_aiawesome/oauth_token_url',
+        get_string('setting_oauth_token_url', 'local_aiawesome'),
+        get_string('setting_oauth_token_url_desc', 'local_aiawesome'),
+        '',
+        PARAM_URL
+    ));
+
+    $settings->add(new admin_setting_configpasswordunmask(
+        'local_aiawesome/oauth_client_id',
+        get_string('setting_oauth_client_id', 'local_aiawesome'),
+        get_string('setting_oauth_client_id_desc', 'local_aiawesome'),
+        ''
+    ));
+
+    $settings->add(new admin_setting_configpasswordunmask(
+        'local_aiawesome/oauth_client_secret',
+        get_string('setting_oauth_client_secret', 'local_aiawesome'),
+        get_string('setting_oauth_client_secret_desc', 'local_aiawesome'),
+        ''
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'local_aiawesome/oauth_app_id',
+        get_string('setting_oauth_app_id', 'local_aiawesome'),
+        get_string('setting_oauth_app_id_desc', 'local_aiawesome'),
+        '',
+        PARAM_ALPHANUMEXT
+    ));
+
+    // === DigitalOcean Configuration ===
+    $settings->add(new admin_setting_heading(
+        'local_aiawesome/digitalocean_header',
+        get_string('settings_header_digitalocean', 'local_aiawesome'),
+        get_string('settings_header_digitalocean_desc', 'local_aiawesome')
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'local_aiawesome/digitalocean_endpoint',
+        get_string('setting_digitalocean_endpoint', 'local_aiawesome'),
+        get_string('setting_digitalocean_endpoint_desc', 'local_aiawesome'),
+        '',
+        PARAM_URL
+    ));
+
+    $settings->add(new admin_setting_configpasswordunmask(
+        'local_aiawesome/digitalocean_api_key',
+        get_string('setting_digitalocean_api_key', 'local_aiawesome'),
+        get_string('setting_digitalocean_api_key_desc', 'local_aiawesome'),
+        ''
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'local_aiawesome/digitalocean_model',
+        get_string('setting_digitalocean_model', 'local_aiawesome'),
+        get_string('setting_digitalocean_model_desc', 'local_aiawesome'),
+        'llama3.1:8b',
+        PARAM_TEXT
+    ));
+
+    $settings->add(new admin_setting_configtextarea(
+        'local_aiawesome/digitalocean_headers',
+        get_string('setting_digitalocean_headers', 'local_aiawesome'),
+        get_string('setting_digitalocean_headers_desc', 'local_aiawesome'),
         '',
         PARAM_TEXT
     ));
