@@ -195,6 +195,27 @@ function createDrawerContainer() {
         flexDirection: 'column',
     });
     
+    // Add loading skeleton HTML
+    drawer.innerHTML = `
+        <div class="aiawesome-drawer-loading">
+            <div class="aiawesome-loading-header">
+                <div class="aiawesome-loading-header-title"></div>
+                <div class="aiawesome-loading-header-close"></div>
+            </div>
+            <div class="aiawesome-loading-content">
+                <div class="aiawesome-loading-spinner">
+                    <div class="aiawesome-loading-icon"></div>
+                    <div class="aiawesome-loading-text">
+                        Loading AI Chat<span class="aiawesome-loading-dots-text">...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="aiawesome-loading-input">
+                <div class="aiawesome-loading-input-box"></div>
+            </div>
+        </div>
+    `;
+    
     // Add to body
     document.body.appendChild(drawer);
 }
@@ -331,20 +352,26 @@ async function loadAndMountApp() {
  */
 function createSimpleChatInterface(drawer) {
     drawer.innerHTML = `
-        <div style="padding: 20px; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center;">
-            <div style="max-width: 300px; margin: 0 auto;">
-                <h3 style="color: #333; margin-bottom: 15px;">AI Chat Assistant</h3>
-                <div style="color: #666; font-size: 14px; line-height: 1.5;">
-                    <p style="margin-bottom: 10px;">🤖 The AI chat interface is loading...</p>
-                    <p style="margin-bottom: 15px;">This fallback appears when the main React app fails to load.</p>
-                    <p style="font-size: 12px; color: #999;">
-                        Check the browser console for technical details or try refreshing the page.
-                    </p>
-                </div>
-                <button onclick="this.parentElement.parentElement.parentElement.parentElement.style.display='none'" 
-                        style="margin-top: 20px; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    Close
+        <div class="aiawesome-drawer-loading">
+            <div class="aiawesome-loading-header">
+                <div style="color: white; font-weight: 600;">AI Chat Assistant</div>
+                <button onclick="this.closest('.aiawesome-drawer-loading').parentElement.style.display='none'" 
+                        style="background: rgba(255,255,255,0.3); color: white; border: none; 
+                               padding: 0.5rem; border-radius: 50%; cursor: pointer; width: 32px; height: 32px;">
+                    ×
                 </button>
+            </div>
+            <div class="aiawesome-loading-content">
+                <div style="text-align: center; max-width: 300px; margin: 0 auto;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                    <h3 style="color: #333; margin-bottom: 15px;">Module Loading Error</h3>
+                    <div style="color: #666; font-size: 14px; line-height: 1.5;">
+                        <p style="margin-bottom: 10px;">The AI chat interface failed to load.</p>
+                        <p style="margin-bottom: 15px; font-size: 12px; color: #999;">
+                            Check the browser console for technical details or try refreshing the page.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     `;
