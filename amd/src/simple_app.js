@@ -100,11 +100,23 @@ function createChatInterface(container, strings) {
             <!-- Messages Container -->
             <div class="aiawesome-messages" id="aiawesome-messages">
                 <div class="aiawesome-welcome">
-                    <div class="aiawesome-message aiawesome-message-assistant">
-                        <div class="aiawesome-message-content">
-                            <p>👋 Hello! I'm your AI assistant. I can help you with questions about this course and your learning.</p>
-                            <p>What would you like to know?</p>
-                        </div>
+                    <div class="aiawesome-welcome-icon">✨</div>
+                    <h4>Welcome to AI Chat</h4>
+                    <p>I'm here to help with your learning! Ask me anything about this course, 
+                    get explanations, or request study tips.</p>
+                    <div class="aiawesome-welcome-prompts">
+                        <button class="aiawesome-prompt-btn" data-prompt="Explain the main concepts covered in this course">
+                            <i class="fa fa-book" aria-hidden="true"></i>
+                            <span>Explain course concepts</span>
+                        </button>
+                        <button class="aiawesome-prompt-btn" data-prompt="Help me understand the assignment requirements">
+                            <i class="fa fa-question-circle" aria-hidden="true"></i>
+                            <span>Help with assignments</span>
+                        </button>
+                        <button class="aiawesome-prompt-btn" data-prompt="Give me study tips for this topic">
+                            <i class="fa fa-lightbulb-o" aria-hidden="true"></i>
+                            <span>Get study tips</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -224,6 +236,26 @@ function setupEventHandlers(container, strings) {
         }
     });
 
+    // Handle suggested prompt clicks
+    function setupPromptButtons() {
+        const promptButtons = messagesContainer.querySelectorAll('.aiawesome-prompt-btn');
+        promptButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const prompt = this.getAttribute('data-prompt');
+                if (prompt) {
+                    input.value = prompt;
+                    input.focus();
+                    // Trigger auto-resize
+                    input.style.height = 'auto';
+                    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+                }
+            });
+        });
+    }
+
+    // Setup prompt buttons on initial load
+    setupPromptButtons();
+
     /**
      * Add a message to the chat.
      *
@@ -258,12 +290,14 @@ function setupEventHandlers(container, strings) {
         sendBtn.style.display = 'none';
         stopBtn.style.display = 'inline-flex';
         
-        // Add empty assistant message for streaming
+        // Add empty assistant message for streaming.
         const assistantMessage = addMessage('assistant', '');
         const contentDiv = assistantMessage.querySelector('.aiawesome-message-content');
         
-        // Add thinking indicator
-        contentDiv.innerHTML = '<span class="aiawesome-thinking">💭 Thinking...</span>';
+        // Add bouncing dots loading indicator.
+        const loadingDots = '<div class="aiawesome-loading-dots" aria-label="Loading response">' +
+            '<span></span><span></span><span></span></div>';
+        contentDiv.innerHTML = loadingDots;
         
         try {
             currentAbortController = new AbortController();
@@ -358,14 +392,27 @@ function setupEventHandlers(container, strings) {
     function clearMessages() {
         messagesContainer.innerHTML = `
             <div class="aiawesome-welcome">
-                <div class="aiawesome-message aiawesome-message-assistant">
-                    <div class="aiawesome-message-content">
-                        <p>👋 Hello! I'm your AI assistant. I can help you with questions about this course and your learning.</p>
-                        <p>What would you like to know?</p>
-                    </div>
+                <div class="aiawesome-welcome-icon">✨</div>
+                <h4>Welcome to AI Chat</h4>
+                <p>I'm here to help with your learning! Ask me anything about this course, get explanations, or request study tips.</p>
+                <div class="aiawesome-welcome-prompts">
+                    <button class="aiawesome-prompt-btn" data-prompt="Explain the main concepts covered in this course">
+                        <i class="fa fa-book" aria-hidden="true"></i>
+                        <span>Explain course concepts</span>
+                    </button>
+                    <button class="aiawesome-prompt-btn" data-prompt="Help me understand the assignment requirements">
+                        <i class="fa fa-question-circle" aria-hidden="true"></i>
+                        <span>Help with assignments</span>
+                    </button>
+                    <button class="aiawesome-prompt-btn" data-prompt="Give me study tips for this topic">
+                        <i class="fa fa-lightbulb-o" aria-hidden="true"></i>
+                        <span>Get study tips</span>
+                    </button>
                 </div>
             </div>
         `;
         sessionId = generateSessionId();
+        // Re-setup prompt button handlers
+        setupPromptButtons();
     }
 }

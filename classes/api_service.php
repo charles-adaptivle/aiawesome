@@ -490,6 +490,8 @@ class api_service {
         // For testing, remove streaming for OpenAI and DigitalOcean providers.
         if (in_array($this->provider, ['openai', 'digitalocean'])) {
             $test_payload['stream'] = false;
+            // Remove stream_options when not streaming (OpenAI requires this).
+            unset($test_payload['stream_options']);
         }
         
         $result = $this->send_chat_request($test_payload);

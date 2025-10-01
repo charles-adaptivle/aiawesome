@@ -92,25 +92,139 @@
 /* Welcome Message */
 .aiawesome-welcome {
     text-align: center;
-    padding: 2rem 1rem;
-    color: #6c757d;
+    padding: 3rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 1rem;
+    margin: 1rem;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+    animation: aiawesome-welcome-fade-in 0.6s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.aiawesome-welcome::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: aiawesome-welcome-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes aiawesome-welcome-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes aiawesome-welcome-shimmer {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    50% {
+        transform: translate(10px, 10px) rotate(5deg);
+    }
 }
 
 .aiawesome-welcome-icon {
+    font-size: 3rem;
     margin-bottom: 1rem;
-    color: #007bff;
-    opacity: 0.7;
+    animation: aiawesome-welcome-icon-bounce 2s ease-in-out infinite;
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes aiawesome-welcome-icon-bounce {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-10px) scale(1.1);
+    }
 }
 
 .aiawesome-welcome h4 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-    color: #495057;
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 1;
 }
 
 .aiawesome-welcome p {
-    margin-bottom: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    opacity: 0.95;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+}
+
+.aiawesome-welcome-prompts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.aiawesome-prompt-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
     font-size: 0.9rem;
+    text-align: left;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.aiawesome-prompt-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.aiawesome-prompt-btn i {
+    font-size: 1.1rem;
+    opacity: 0.8;
+}
+
+/* Reduced motion for welcome screen */
+@media (prefers-reduced-motion: reduce) {
+    .aiawesome-welcome {
+        animation: none;
+    }
+    
+    .aiawesome-welcome::before {
+        animation: none;
+    }
+    
+    .aiawesome-welcome-icon {
+        animation: none;
+    }
+    
+    .aiawesome-prompt-btn:hover {
+        transform: none;
+    }
 }
 
 /* Messages */
@@ -431,5 +545,80 @@
     .aiawesome-input:focus {
         border-color: #0066cc;
         box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.5);
+    }
+}
+
+/* Bouncing Dots Loading Animation */
+.aiawesome-loading-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.5rem 0;
+}
+
+.aiawesome-loading-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #007bff;
+    display: inline-block;
+    animation: aiawesome-bounce 1.4s infinite ease-in-out both;
+}
+
+.aiawesome-loading-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.aiawesome-loading-dots span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+.aiawesome-loading-dots span:nth-child(3) {
+    animation-delay: 0s;
+}
+
+@keyframes aiawesome-bounce {
+    0%, 80%, 100% {
+        transform: scale(0);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Reduced motion support for loading animation */
+@media (prefers-reduced-motion: reduce) {
+    .aiawesome-loading-dots span {
+        animation: aiawesome-pulse 1.5s infinite ease-in-out;
+    }
+    
+    .aiawesome-loading-dots span:nth-child(1) {
+        animation-delay: 0s;
+    }
+    
+    .aiawesome-loading-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    
+    .aiawesome-loading-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+}
+
+@keyframes aiawesome-pulse {
+    0%, 100% {
+        opacity: 0.4;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Loading dots in dark theme */
+@media (prefers-color-scheme: dark) {
+    .theme-dark .aiawesome-loading-dots span {
+        background-color: #63b3ed;
     }
 }
