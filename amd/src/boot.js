@@ -9,7 +9,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import { getString } from 'core/str';
+import {getString} from 'core/str';
+
+// Cache for preloaded app module and mounted state.
+let preloadedApp = null;
+let appMountedOnce = false;
 
 /**
  * Initialize the AI Awesome chat feature.
@@ -29,7 +33,24 @@ export const init = () => {
     } else {
         setupUI();
     }
+    
+    // Preload the app module in the background for faster drawer opening
+    preloadAppModule();
 };
+
+/**
+ * Preload the app module in the background to reduce drawer open time.
+ */
+function preloadAppModule() {
+    // Use setTimeout to defer loading until after page is interactive
+    setTimeout(() => {
+        require(['local_aiawesome/simple_app'], (app) => {
+            preloadedApp = app;
+        }, (error) => {
+            // Silent fail - will load normally when drawer opens
+        });
+    }, 1000); // Wait 1 second after page load to avoid blocking page rendering
+}
 
 /**
  * Set up the user interface elements.
@@ -284,7 +305,9 @@ async function openDrawer() {
  */
 function closeDrawer() {
     const drawer = document.getElementById('aiawesome-drawer');
-    if (!drawer) return;
+    if (!drawer) {
+        return;
+    }
     
     drawer.classList.remove('open');
     drawer.setAttribute('aria-hidden', 'true');
@@ -294,6 +317,8 @@ function closeDrawer() {
     setTimeout(() => {
         if (!drawer.classList.contains('open')) {
             drawer.style.display = 'none';
+            // Keep the mounted app in DOM - don't destroy it
+            // This makes subsequent opens instant
         }
     }, 300);
     
@@ -316,18 +341,30 @@ async function loadAndMountApp() {
         return;
     }
     
-    // Check if app is already loaded
-    if (drawer.hasAttribute('data-app-mounted')) {
+    // Check if app is already mounted - just return if so
+    if (appMountedOnce && drawer.hasAttribute('data-app-mounted')) {
         return;
     }
     
     try {
-        // Use RequireJS to load the simple vanilla JS app module
+        let app = preloadedApp;
+        
+        // If module was preloaded, use it immediately (fast path)
+        if (app && app.mount) {
+            await app.mount(drawer);
+            drawer.setAttribute('data-app-mounted', 'true');
+            appMountedOnce = true;
+            return;
+        }
+        
+        // Otherwise, load it now (slower path)
         await new Promise((resolve, reject) => {
-            require(['local_aiawesome/simple_app'], (app) => {
-                if (app && app.mount) {
-                    app.mount(drawer).then(() => {
+            require(['local_aiawesome/simple_app'], (loadedApp) => {
+                if (loadedApp && loadedApp.mount) {
+                    preloadedApp = loadedApp; // Cache for next time
+                    loadedApp.mount(drawer).then(() => {
                         drawer.setAttribute('data-app-mounted', 'true');
+                        appMountedOnce = true;
                         resolve();
                     }).catch(reject);
                 } else {
@@ -342,6 +379,7 @@ async function loadAndMountApp() {
         // Fallback: create a simple chat interface
         createSimpleChatInterface(drawer);
         drawer.setAttribute('data-app-mounted', 'true');
+        appMountedOnce = true;
     }
 }
 
