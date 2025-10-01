@@ -15,18 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for Ai awesome
+ * Definition of AI Awesome scheduled tasks.
  *
  * @package    local_aiawesome
- * @copyright  2025 2024 Charles Horton <charles@adaptivle.co.uk>
+ * @copyright  2025 Charles Horton <charles@adaptivle.co.uk>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component    = 'local_aiawesome';
-$plugin->release      = '1.2';
-$plugin->version      = 2025100101;
-$plugin->requires     = 2024100700;
-$plugin->supported    = [405, 500];
-$plugin->maturity     = MATURITY_STABLE;
+$tasks = [
+    [
+        'classname' => 'local_aiawesome\task\fetch_models_task',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '2',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*'
+    ],
+];

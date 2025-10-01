@@ -27,6 +27,9 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'AI Awesome';
 
+// Scheduled tasks.
+$string['task_fetch_models'] = 'Fetch AI model lists';
+
 // Settings page.
 $string['settings_header_general'] = 'General Settings';
 $string['settings_header_provider'] = 'AI Provider Configuration';

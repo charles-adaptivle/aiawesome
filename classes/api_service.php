@@ -308,6 +308,9 @@ class api_service {
             'max_tokens' => (int)$config->max_tokens,
             'temperature' => (float)$config->temperature,
             'stream' => true,
+            'stream_options' => [
+                'include_usage' => true  // Request usage data in streaming response
+            ],
         ];
     }
 

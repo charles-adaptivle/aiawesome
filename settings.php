@@ -83,12 +83,36 @@ if ($hassiteconfig) {
         ''
     ));
 
-    $settings->add(new admin_setting_configtext(
+    // Get cached OpenAI models for dropdown.
+    $openai_models_json = get_config('local_aiawesome', 'cached_openai_models');
+    $openai_models = [];
+    if ($openai_models_json) {
+        $models_array = json_decode($openai_models_json, true);
+        if ($models_array) {
+            foreach ($models_array as $model) {
+                $openai_models[$model['id']] = $model['name'];
+            }
+        }
+    }
+    // Fallback to common models if cache is empty.
+    if (empty($openai_models)) {
+        $openai_models = [
+            'gpt-4o' => 'GPT-4o',
+            'gpt-4o-mini' => 'GPT-4o Mini',
+            'gpt-4-turbo' => 'GPT-4 Turbo',
+            'gpt-4' => 'GPT-4',
+            'gpt-3.5-turbo' => 'GPT-3.5 Turbo',
+        ];
+    }
+    $cached_time = get_config('local_aiawesome', 'cached_openai_models_time');
+    $cache_info = $cached_time ? ' (cached ' . userdate($cached_time, get_string('strftimedatetime')) . ')' : '';
+    
+    $settings->add(new admin_setting_configselect(
         'local_aiawesome/openai_model',
         get_string('setting_openai_model', 'local_aiawesome'),
-        get_string('setting_openai_model_desc', 'local_aiawesome'),
+        get_string('setting_openai_model_desc', 'local_aiawesome') . $cache_info,
         'gpt-4o-mini',
-        PARAM_TEXT
+        $openai_models
     ));
 
     $settings->add(new admin_setting_configtext(
@@ -174,12 +198,37 @@ if ($hassiteconfig) {
         ''
     ));
 
-    $settings->add(new admin_setting_configtext(
+    // Get cached DigitalOcean models for dropdown.
+    $do_models_json = get_config('local_aiawesome', 'cached_digitalocean_models');
+    $do_models = [];
+    if ($do_models_json) {
+        $models_array = json_decode($do_models_json, true);
+        if ($models_array) {
+            foreach ($models_array as $model) {
+                $do_models[$model['id']] = $model['name'];
+            }
+        }
+    }
+    // Fallback to default models if cache is empty.
+    if (empty($do_models)) {
+        $do_models = [
+            'meta-llama/Llama-3.2-90B-Vision-Instruct' => 'Llama 3.2 90B Vision Instruct',
+            'meta-llama/Llama-3.2-11B-Vision-Instruct' => 'Llama 3.2 11B Vision Instruct',
+            'meta-llama/Llama-3.1-70B-Instruct' => 'Llama 3.1 70B Instruct',
+            'meta-llama/Llama-3.1-8B-Instruct' => 'Llama 3.1 8B Instruct',
+            'meta-llama/Meta-Llama-3-70B-Instruct' => 'Llama 3 70B Instruct',
+            'meta-llama/Meta-Llama-3-8B-Instruct' => 'Llama 3 8B Instruct',
+        ];
+    }
+    $cached_time = get_config('local_aiawesome', 'cached_digitalocean_models_time');
+    $cache_info = $cached_time ? ' (cached ' . userdate($cached_time, get_string('strftimedatetime')) . ')' : '';
+    
+    $settings->add(new admin_setting_configselect(
         'local_aiawesome/digitalocean_model',
         get_string('setting_digitalocean_model', 'local_aiawesome'),
-        get_string('setting_digitalocean_model_desc', 'local_aiawesome'),
-        'llama3.1:8b',
-        PARAM_TEXT
+        get_string('setting_digitalocean_model_desc', 'local_aiawesome') . $cache_info,
+        'meta-llama/Llama-3.1-8B-Instruct',
+        $do_models
     ));
 
     $settings->add(new admin_setting_configtextarea(

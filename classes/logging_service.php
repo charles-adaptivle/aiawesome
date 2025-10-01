@@ -58,6 +58,9 @@ class logging_service {
             'duration_ms' => null,
             'ttff_ms' => null,
             'tokens_used' => null,
+            'prompt_tokens' => null,
+            'completion_tokens' => null,
+            'provider' => get_config('local_aiawesome', 'ai_provider'),
         ];
 
         return $DB->insert_record('local_aiawesome_logs', $record);
@@ -79,7 +82,8 @@ class logging_service {
 
         $allowed_fields = [
             'bytes_up', 'bytes_down', 'status', 'error', 'content',
-            'duration_ms', 'ttff_ms', 'tokens_used'
+            'duration_ms', 'ttff_ms', 'tokens_used', 'prompt_tokens', 
+            'completion_tokens', 'provider'
         ];
 
         $update = (object) ['id' => $logid];
@@ -283,5 +287,107 @@ class logging_service {
         global $DB;
 
         return $DB->delete_records('local_aiawesome_logs', ['userid' => $userid]);
+    }
+
+    /**
+     * Get token usage statistics.
+     *
+     * @param int $since Timestamp to calculate stats from (default: 30 days ago)
+     * @return object Statistics object
+     */
+    public static function get_token_statistics(int $since = null): object {
+        global $DB;
+
+        if ($since === null) {
+            $since = time() - (30 * 24 * 3600); // Default: last 30 days.
+        }
+
+        // Get overall token stats.
+        $sql = "SELECT 
+                    COUNT(*) as total_requests,
+                    SUM(COALESCE(prompt_tokens, 0)) as total_prompt_tokens,
+                    SUM(COALESCE(completion_tokens, 0)) as total_completion_tokens,
+                    SUM(COALESCE(tokens_used, 0)) as total_tokens,
+                    AVG(COALESCE(prompt_tokens, 0)) as avg_prompt_tokens,
+                    AVG(COALESCE(completion_tokens, 0)) as avg_completion_tokens
+                FROM {local_aiawesome_logs}
+                WHERE createdat >= :since
+                  AND status = 'completed'";
+
+        $stats = $DB->get_record_sql($sql, ['since' => $since]);
+
+        // Get stats by provider.
+        $sql = "SELECT 
+                    provider,
+                    COUNT(*) as requests,
+                    SUM(COALESCE(prompt_tokens, 0)) as prompt_tokens,
+                    SUM(COALESCE(completion_tokens, 0)) as completion_tokens,
+                    SUM(COALESCE(tokens_used, 0)) as total_tokens
+                FROM {local_aiawesome_logs}
+                WHERE createdat >= :since
+                  AND status = 'completed'
+                  AND provider IS NOT NULL
+                GROUP BY provider";
+
+        $provider_stats = $DB->get_records_sql($sql, ['since' => $since]);
+
+        // Get top users by token usage.
+        $sql = "SELECT 
+                    l.userid,
+                    u.firstname,
+                    u.lastname,
+                    COUNT(*) as requests,
+                    SUM(COALESCE(l.tokens_used, 0)) as total_tokens
+                FROM {local_aiawesome_logs} l
+                JOIN {user} u ON l.userid = u.id
+                WHERE l.createdat >= :since
+                  AND l.status = 'completed'
+                GROUP BY l.userid, u.firstname, u.lastname
+                ORDER BY total_tokens DESC
+                LIMIT 10";
+
+        $top_users = $DB->get_records_sql($sql, ['since' => $since]);
+
+        // Calculate time-based breakdown (today, this week, this month).
+        $today = strtotime('today');
+        $week_ago = strtotime('-7 days');
+        $month_ago = strtotime('-30 days');
+
+        $today_stats = $DB->get_record_sql(
+            "SELECT SUM(COALESCE(tokens_used, 0)) as tokens 
+             FROM {local_aiawesome_logs} 
+             WHERE createdat >= :since AND status = 'completed'",
+            ['since' => $today]
+        );
+
+        $week_stats = $DB->get_record_sql(
+            "SELECT SUM(COALESCE(tokens_used, 0)) as tokens 
+             FROM {local_aiawesome_logs} 
+             WHERE createdat >= :since AND status = 'completed'",
+            ['since' => $week_ago]
+        );
+
+        $month_stats = $DB->get_record_sql(
+            "SELECT SUM(COALESCE(tokens_used, 0)) as tokens 
+             FROM {local_aiawesome_logs} 
+             WHERE createdat >= :since AND status = 'completed'",
+            ['since' => $month_ago]
+        );
+
+        return (object) [
+            'total_requests' => (int) ($stats->total_requests ?? 0),
+            'total_tokens' => (int) ($stats->total_tokens ?? 0),
+            'total_prompt_tokens' => (int) ($stats->total_prompt_tokens ?? 0),
+            'total_completion_tokens' => (int) ($stats->total_completion_tokens ?? 0),
+            'avg_prompt_tokens' => round((float) ($stats->avg_prompt_tokens ?? 0), 1),
+            'avg_completion_tokens' => round((float) ($stats->avg_completion_tokens ?? 0), 1),
+            'tokens_today' => (int) ($today_stats->tokens ?? 0),
+            'tokens_this_week' => (int) ($week_stats->tokens ?? 0),
+            'tokens_this_month' => (int) ($month_stats->tokens ?? 0),
+            'by_provider' => $provider_stats,
+            'top_users' => $top_users,
+            'period_start' => $since,
+            'period_end' => time(),
+        ];
     }
 }

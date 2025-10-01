@@ -186,11 +186,12 @@ try {
     ]);
 
     // Global variables for chunk handling.
-    global $chunk_buffer, $bytes_received, $first_token_time, $tokens_count;
+    global $chunk_buffer, $bytes_received, $first_token_time, $tokens_count, $usage_data;
     $chunk_buffer = '';
     $bytes_received = 0;
     $first_token_time = null;
     $tokens_count = 0;
+    $usage_data = null;
 
     // Execute the request.
     $success = curl_exec($curl);
@@ -220,15 +221,26 @@ try {
         $duration = (int) ((microtime(true) - $starttime) * 1000);
         $ttff = $first_token_time ? (int) (($first_token_time - $starttime) * 1000) : null;
         
-        logging_service::update_log_entry($logid, [
+        $log_data = [
             'status' => 'completed',
             'bytes_up' => $bytes_up,
             'bytes_down' => $bytes_received,
             'duration_ms' => $duration,
             'ttff_ms' => $ttff,
-            'tokens_used' => $tokens_count,
             'content' => get_config('local_aiawesome', 'log_content') ? $query : null,
-        ]);
+        ];
+        
+        // Add token usage if available from API response.
+        if ($usage_data) {
+            $log_data['prompt_tokens'] = $usage_data['prompt_tokens'] ?? null;
+            $log_data['completion_tokens'] = $usage_data['completion_tokens'] ?? null;
+            $log_data['tokens_used'] = $usage_data['total_tokens'] ?? null;
+        } else {
+            // Fallback to approximate count if no usage data from API.
+            $log_data['tokens_used'] = $tokens_count;
+        }
+        
+        logging_service::update_log_entry($logid, $log_data);
     }
 
 } catch (Exception $e) {
@@ -251,7 +263,7 @@ try {
  * @return int Number of bytes processed
  */
 function handle_sse_chunk($curl, $data): int {
-    global $chunk_buffer, $bytes_received, $first_token_time, $tokens_count;
+    global $chunk_buffer, $bytes_received, $first_token_time, $tokens_count, $usage_data;
     
     $bytes_received += strlen($data);
     $chunk_buffer .= $data;
@@ -269,17 +281,44 @@ function handle_sse_chunk($curl, $data): int {
         // Parse SSE format.
         if (strpos($line, 'data: ') === 0) {
             $json = substr($line, 6);
+            
+            // Check for [DONE] marker from OpenAI.
+            if ($json === '[DONE]') {
+                continue;
+            }
+            
             $event_data = json_decode($json, true);
             
             if ($event_data) {
+                // Extract content from different provider formats.
+                $content = null;
+                if (isset($event_data['text'])) {
+                    // Custom format with 'text' field.
+                    $content = $event_data['text'];
+                } elseif (isset($event_data['choices'][0]['delta']['content'])) {
+                    // OpenAI streaming format.
+                    $content = $event_data['choices'][0]['delta']['content'];
+                } elseif (isset($event_data['content'])) {
+                    // Direct content field.
+                    $content = $event_data['content'];
+                }
+                
                 // Track first token time.
-                if (!$first_token_time && isset($event_data['text'])) {
+                if (!$first_token_time && $content) {
                     $first_token_time = microtime(true);
                 }
                 
                 // Count tokens (approximate).
-                if (isset($event_data['text'])) {
-                    $tokens_count += str_word_count($event_data['text']);
+                if ($content) {
+                    $tokens_count += str_word_count($content);
+                }
+                
+                // Capture usage data if present (OpenAI sends this in final chunk).
+                if (isset($event_data['usage'])) {
+                    $usage_data = $event_data['usage'];
+                } elseif (isset($event_data['x_groq']) && isset($event_data['x_groq']['usage'])) {
+                    // Some providers nest usage differently.
+                    $usage_data = $event_data['x_groq']['usage'];
                 }
                 
                 // Forward to client.

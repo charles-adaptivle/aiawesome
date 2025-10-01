@@ -60,5 +60,33 @@ function xmldb_local_aiawesome_upgrade($oldversion) {
     //     upgrade_plugin_savepoint(true, 2025100200, 'local', 'aiawesome');
     // }
 
+    // Add token tracking fields and provider field.
+    if ($oldversion < 2025100101) {
+        $table = new xmldb_table('local_aiawesome_logs');
+        
+        // Add prompt_tokens field.
+        $field = new xmldb_field('prompt_tokens', XMLDB_TYPE_INTEGER, '10', null, false, null, null, 'tokens_used');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        // Add completion_tokens field.
+        $field = new xmldb_field('completion_tokens', XMLDB_TYPE_INTEGER, '10', null, false, null, null, 'prompt_tokens');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        // Add provider field.
+        $field = new xmldb_field('provider', XMLDB_TYPE_CHAR, '50', null, false, null, null, 'completion_tokens');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        mtrace('AI Awesome: Added token tracking fields (prompt_tokens, completion_tokens, provider)');
+        
+        // AI Awesome savepoint reached.
+        upgrade_plugin_savepoint(true, 2025100101, 'local', 'aiawesome');
+    }
+
     return true;
 }

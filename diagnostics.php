@@ -34,7 +34,9 @@ $PAGE->set_url('/local/aiawesome/diagnostics.php');
 
 // Check if user can use the plugin
 $can_use = has_capability('local/aiawesome:use', context_system::instance());
-
+// Add the CSS and JS manually for testing
+$PAGE->requires->css('/local/aiawesome/styles.css');
+$PAGE->requires->js_call_amd('local_aiawesome/boot', 'init');
 echo $OUTPUT->header();
 
 echo '<div class="container-fluid">';
@@ -133,6 +135,125 @@ echo '</table>';
 echo '</div>';
 echo '</div>';
 
+// Token Usage Statistics
+if (get_config('local_aiawesome', 'enable_logging')) {
+    echo '<div class="card mb-3">';
+    echo '<div class="card-header"><h5>Token Usage Statistics</h5></div>';
+    echo '<div class="card-body">';
+    
+    require_once(__DIR__ . '/classes/logging_service.php');
+    $token_stats = \local_aiawesome\logging_service::get_token_statistics();
+    
+    // Overview cards
+    echo '<div class="row mb-3">';
+    
+    echo '<div class="col-md-3">';
+    echo '<div class="card text-center border-primary">';
+    echo '<div class="card-body">';
+    echo '<h3 class="text-primary">' . number_format($token_stats->tokens_today) . '</h3>';
+    echo '<p class="card-text">Tokens Today</p>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+    
+    echo '<div class="col-md-3">';
+    echo '<div class="card text-center border-info">';
+    echo '<div class="card-body">';
+    echo '<h3 class="text-info">' . number_format($token_stats->tokens_this_week) . '</h3>';
+    echo '<p class="card-text">Tokens This Week</p>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+    
+    echo '<div class="col-md-3">';
+    echo '<div class="card text-center border-success">';
+    echo '<div class="card-body">';
+    echo '<h3 class="text-success">' . number_format($token_stats->tokens_this_month) . '</h3>';
+    echo '<p class="card-text">Tokens This Month</p>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+    
+    echo '<div class="col-md-3">';
+    echo '<div class="card text-center border-secondary">';
+    echo '<div class="card-body">';
+    echo '<h3 class="text-secondary">' . number_format($token_stats->total_requests) . '</h3>';
+    echo '<p class="card-text">Total Requests</p>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+    
+    echo '</div>'; // End row
+    
+    // Detailed breakdown
+    echo '<h6>Token Breakdown</h6>';
+    echo '<table class="table table-bordered table-sm">';
+    echo '<tr><td><strong>Prompt Tokens</strong></td><td>' . number_format($token_stats->total_prompt_tokens) . ' (avg: ' . $token_stats->avg_prompt_tokens . ')</td></tr>';
+    echo '<tr><td><strong>Completion Tokens</strong></td><td>' . number_format($token_stats->total_completion_tokens) . ' (avg: ' . $token_stats->avg_completion_tokens . ')</td></tr>';
+    echo '<tr><td><strong>Total Tokens</strong></td><td>' . number_format($token_stats->total_tokens) . '</td></tr>';
+    echo '</table>';
+    
+    // Provider breakdown
+    if (!empty($token_stats->by_provider)) {
+        echo '<h6 class="mt-3">Usage by Provider</h6>';
+        echo '<table class="table table-bordered table-sm">';
+        echo '<thead><tr><th>Provider</th><th>Requests</th><th>Prompt</th><th>Completion</th><th>Total</th></tr></thead>';
+        echo '<tbody>';
+        foreach ($token_stats->by_provider as $prov) {
+            $provider_name = ucfirst(str_replace('_', ' ', $prov->provider ?: 'Unknown'));
+            echo '<tr>';
+            echo '<td><strong>' . $provider_name . '</strong></td>';
+            echo '<td>' . number_format($prov->requests) . '</td>';
+            echo '<td>' . number_format($prov->prompt_tokens) . '</td>';
+            echo '<td>' . number_format($prov->completion_tokens) . '</td>';
+            echo '<td>' . number_format($prov->total_tokens) . '</td>';
+            echo '</tr>';
+        }
+        echo '</tbody>';
+        echo '</table>';
+    }
+    
+    // Top users
+    if (!empty($token_stats->top_users)) {
+        echo '<h6 class="mt-3">Top 10 Users by Token Usage</h6>';
+        echo '<table class="table table-bordered table-sm">';
+        echo '<thead><tr><th>User</th><th>Requests</th><th>Total Tokens</th></tr></thead>';
+        echo '<tbody>';
+        foreach ($token_stats->top_users as $user) {
+            echo '<tr>';
+            echo '<td>' . $user->firstname . ' ' . $user->lastname . '</td>';
+            echo '<td>' . number_format($user->requests) . '</td>';
+            echo '<td>' . number_format($user->total_tokens) . '</td>';
+            echo '</tr>';
+        }
+        echo '</tbody>';
+        echo '</table>';
+    }
+    
+    // Cost estimates (OpenAI pricing as of 2025)
+    $current_provider = get_config('local_aiawesome', 'ai_provider');
+    if ($current_provider === 'openai') {
+        echo '<div class="alert alert-info mt-3">';
+        echo '<h6>Estimated Cost (OpenAI gpt-4o-mini)</h6>';
+        // gpt-4o-mini: $0.150 per 1M input tokens, $0.600 per 1M output tokens
+        $input_cost = ($token_stats->total_prompt_tokens / 1000000) * 0.150;
+        $output_cost = ($token_stats->total_completion_tokens / 1000000) * 0.600;
+        $total_cost = $input_cost + $output_cost;
+        echo '<p class="mb-0">';
+        echo 'Input: $' . number_format($input_cost, 4) . ' | ';
+        echo 'Output: $' . number_format($output_cost, 4) . ' | ';
+        echo '<strong>Total: $' . number_format($total_cost, 2) . '</strong>';
+        echo '</p>';
+        echo '<small class="text-muted">Based on gpt-4o-mini pricing ($0.150/1M input, $0.600/1M output). Actual costs may vary.</small>';
+        echo '</div>';
+    }
+    
+    echo '</div>';
+    echo '</div>';
+} else {
+    echo '<div class="alert alert-warning">Logging is disabled. Enable logging in settings to see token usage statistics.</div>';
+}
+
 // Manual test
 echo '<div class="card mb-3">';
 echo '<div class="card-header"><h5>Manual Test</h5></div>';
@@ -157,9 +278,7 @@ echo '</div>';
 
 echo '</div>'; // container-fluid
 
-// Add the CSS and JS manually for testing
-$PAGE->requires->css('/local/aiawesome/styles.css');
-$PAGE->requires->js_call_amd('local_aiawesome/boot', 'init');
+
 
 ?>
 <script>

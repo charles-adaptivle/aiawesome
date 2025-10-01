@@ -19,6 +19,9 @@
         <FIELD NAME="duration_ms" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Duration of the interaction in milliseconds"/>
         <FIELD NAME="ttff_ms" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time to first token in milliseconds"/>
         <FIELD NAME="tokens_used" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Total tokens consumed"/>
+        <FIELD NAME="prompt_tokens" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Number of tokens in the prompt"/>
+        <FIELD NAME="completion_tokens" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Number of tokens in the completion"/>
+        <FIELD NAME="provider" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="AI provider used (openai, custom_oauth, digitalocean)"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
