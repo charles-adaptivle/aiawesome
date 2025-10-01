@@ -25,8 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component    = 'local_aiawesome';
-$plugin->release      = '1.0';
-$plugin->version      = 2025092400;
+$plugin->release      = '1.1';
+$plugin->version      = 2025100100;
 $plugin->requires     = 2024100700;
 $plugin->supported    = [405, 500];
 $plugin->maturity     = MATURITY_STABLE;

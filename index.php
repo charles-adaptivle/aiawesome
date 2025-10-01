@@ -51,10 +51,7 @@ echo html_writer::start_tag('div', ['class' => 'col-md-6']);
 echo html_writer::tag('h3', 'Configuration Status');
 
 $enabled = get_config('local_aiawesome', 'enabled');
-$base_url = get_config('local_aiawesome', 'base_url');
-$client_id = get_config('local_aiawesome', 'client_id');
-$client_secret = get_config('local_aiawesome', 'client_secret');
-$token_url = get_config('local_aiawesome', 'token_url');
+$provider = get_config('local_aiawesome', 'ai_provider') ?: 'openai';
 
 echo html_writer::start_tag('table', ['class' => 'table table-striped']);
 echo html_writer::tag('tr', 
@@ -66,36 +63,93 @@ echo html_writer::tag('tr',
 );
 
 echo html_writer::tag('tr', 
-    html_writer::tag('td', 'Base URL') . 
-    html_writer::tag('td', !empty($base_url) ? 
-        html_writer::tag('span', '✓ Configured', ['class' => 'text-success']) : 
-        html_writer::tag('span', '❌ Missing', ['class' => 'text-danger'])
-    )
+    html_writer::tag('td', 'AI Provider') . 
+    html_writer::tag('td', html_writer::tag('strong', ucfirst(str_replace('_', ' ', $provider))))
 );
 
-echo html_writer::tag('tr', 
-    html_writer::tag('td', 'OAuth2 Client ID') . 
-    html_writer::tag('td', !empty($client_id) ? 
-        html_writer::tag('span', '✓ Configured', ['class' => 'text-success']) : 
-        html_writer::tag('span', '❌ Missing', ['class' => 'text-danger'])
-    )
-);
-
-echo html_writer::tag('tr', 
-    html_writer::tag('td', 'OAuth2 Client Secret') . 
-    html_writer::tag('td', !empty($client_secret) ? 
-        html_writer::tag('span', '✓ Configured', ['class' => 'text-success']) : 
-        html_writer::tag('span', '❌ Missing', ['class' => 'text-danger'])
-    )
-);
-
-echo html_writer::tag('tr', 
-    html_writer::tag('td', 'Token URL') . 
-    html_writer::tag('td', !empty($token_url) ? 
-        html_writer::tag('span', '✓ Configured', ['class' => 'text-success']) : 
-        html_writer::tag('span', '❌ Missing', ['class' => 'text-danger'])
-    )
-);
+// Provider-specific configuration checks
+switch ($provider) {
+    case 'openai':
+        $api_key = get_config('local_aiawesome', 'openai_api_key');
+        $model = get_config('local_aiawesome', 'openai_model');
+        
+        echo html_writer::tag('tr', 
+            html_writer::tag('td', 'OpenAI API Key') . 
+            html_writer::tag('td', !empty($api_key) ? 
+                html_writer::tag('span', '✓ Configured', ['class' => 'text-success']) : 
+                html_writer::tag('span', '❌ Missing', ['class' => 'text-danger'])
+            )
+        );
+        
+        echo html_writer::tag('tr', 
+            html_writer::tag('td', 'OpenAI Model') . 
+            html_writer::tag('td', !empty($model) ? 
+                html_writer::tag('span', $model, ['class' => 'text-success']) : 
+                html_writer::tag('span', '❌ Not set', ['class' => 'text-danger'])
+            )
+        );
+        break;
+        
+    case 'custom_oauth':
+        $base_url = get_config('local_aiawesome', 'oauth_base_url');
+        $client_id = get_config('local_aiawesome', 'oauth_client_id');
+        $client_secret = get_config('local_aiawesome', 'oauth_client_secret');
+        $token_url = get_config('local_aiawesome', 'oauth_token_url');
+        
+        echo html_writer::tag('tr', 
+            html_writer::tag('td', 'OAuth Base URL') . 
+            html_writer::tag('td', !empty($base_url) ? 
+                html_writer::tag('span', '✓ Configured', ['class' => 'text-success']) : 
+                html_writer::tag('span', '❌ Missing', ['class' => 'text-danger'])
+            )
+        );
+        
+        echo html_writer::tag('tr', 
+            html_writer::tag('td', 'OAuth Client ID') . 
+            html_writer::tag('td', !empty($client_id) ? 
+                html_writer::tag('span', '✓ Configured', ['class' => 'text-success']) : 
+                html_writer::tag('span', '❌ Missing', ['class' => 'text-danger'])
+            )
+        );
+        
+        echo html_writer::tag('tr', 
+            html_writer::tag('td', 'OAuth Client Secret') . 
+            html_writer::tag('td', !empty($client_secret) ? 
+                html_writer::tag('span', '✓ Configured', ['class' => 'text-success']) : 
+                html_writer::tag('span', '❌ Missing', ['class' => 'text-danger'])
+            )
+        );
+        
+        echo html_writer::tag('tr', 
+            html_writer::tag('td', 'OAuth Token URL') . 
+            html_writer::tag('td', !empty($token_url) ? 
+                html_writer::tag('span', '✓ Configured', ['class' => 'text-success']) : 
+                html_writer::tag('span', '❌ Missing', ['class' => 'text-danger'])
+            )
+        );
+        break;
+        
+    case 'digitalocean':
+        $endpoint = get_config('local_aiawesome', 'digitalocean_endpoint');
+        $model = get_config('local_aiawesome', 'digitalocean_model');
+        
+        echo html_writer::tag('tr', 
+            html_writer::tag('td', 'DigitalOcean Endpoint') . 
+            html_writer::tag('td', !empty($endpoint) ? 
+                html_writer::tag('span', '✓ Configured', ['class' => 'text-success']) : 
+                html_writer::tag('span', '❌ Missing', ['class' => 'text-danger'])
+            )
+        );
+        
+        echo html_writer::tag('tr', 
+            html_writer::tag('td', 'Model Name') . 
+            html_writer::tag('td', !empty($model) ? 
+                html_writer::tag('span', $model, ['class' => 'text-success']) : 
+                html_writer::tag('span', '❌ Not set', ['class' => 'text-danger'])
+            )
+        );
+        break;
+}
 
 echo html_writer::end_tag('table');
 echo html_writer::end_tag('div');
@@ -134,15 +188,15 @@ echo html_writer::tag('tr',
 );
 
 // Check if built assets exist
-$boot_js = __DIR__ . '/amd/build/boot.min.js';
-$app_js = __DIR__ . '/amd/build/app.min.js';
-$sse_js = __DIR__ . '/amd/build/sse.min.js';
+$boot_js = __DIR__ . '/amd/build/boot.js';
+$app_js = __DIR__ . '/amd/build/simple_app.js';
+$sse_js = __DIR__ . '/amd/build/sse.js';
 
 $assets_built = file_exists($boot_js) && file_exists($app_js) && file_exists($sse_js);
 echo html_writer::tag('tr', 
     html_writer::tag('td', 'Built Assets') . 
     html_writer::tag('td', $assets_built ? 
-        html_writer::tag('span', '✓ Present', ['class' => 'text-success']) : 
+        html_writer::tag('span', '✓ Present (boot.js, simple_app.js, sse.js)', ['class' => 'text-success']) : 
         html_writer::tag('span', '❌ Missing (run npm run build)', ['class' => 'text-warning'])
     )
 );
@@ -185,28 +239,35 @@ if (get_config('local_aiawesome', 'enable_logging')) {
     echo html_writer::end_tag('div');
 }
 
-// OAuth Test (if configured)
-if ($enabled && !empty($base_url) && !empty($client_id) && !empty($client_secret) && !empty($token_url)) {
-    echo html_writer::start_tag('div', ['class' => 'row mt-4']);
-    echo html_writer::start_tag('div', ['class' => 'col-12']);
-    echo html_writer::tag('h3', 'OAuth2 Connection Test');
+// OAuth Test (only for custom_oauth provider)
+if ($enabled && $provider === 'custom_oauth') {
+    $oauth_base_url = get_config('local_aiawesome', 'oauth_base_url');
+    $oauth_client_id = get_config('local_aiawesome', 'oauth_client_id');
+    $oauth_client_secret = get_config('local_aiawesome', 'oauth_client_secret');
+    $oauth_token_url = get_config('local_aiawesome', 'oauth_token_url');
     
-    try {
-        $oauth = new oauth_service();
-        $token = $oauth->get_access_token();
+    if (!empty($oauth_base_url) && !empty($oauth_client_id) && !empty($oauth_client_secret) && !empty($oauth_token_url)) {
+        echo html_writer::start_tag('div', ['class' => 'row mt-4']);
+        echo html_writer::start_tag('div', ['class' => 'col-12']);
+        echo html_writer::tag('h3', 'OAuth2 Connection Test');
         
-        if ($token) {
-            echo html_writer::tag('div', '✓ OAuth2 authentication successful', ['class' => 'alert alert-success']);
-            echo html_writer::tag('p', 'Token expires: ' . date('Y-m-d H:i:s', $token->expires_at));
-        } else {
-            echo html_writer::tag('div', '❌ OAuth2 authentication failed', ['class' => 'alert alert-danger']);
+        try {
+            $oauth = new oauth_service();
+            $token = $oauth->get_access_token();
+            
+            if ($token) {
+                echo html_writer::tag('div', '✓ OAuth2 authentication successful', ['class' => 'alert alert-success']);
+                echo html_writer::tag('p', 'Token expires: ' . date('Y-m-d H:i:s', $token->expires_at));
+            } else {
+                echo html_writer::tag('div', '❌ OAuth2 authentication failed', ['class' => 'alert alert-danger']);
+            }
+        } catch (Exception $e) {
+            echo html_writer::tag('div', '❌ OAuth2 error: ' . $e->getMessage(), ['class' => 'alert alert-danger']);
         }
-    } catch (Exception $e) {
-        echo html_writer::tag('div', '❌ OAuth2 error: ' . $e->getMessage(), ['class' => 'alert alert-danger']);
+        
+        echo html_writer::end_tag('div');
+        echo html_writer::end_tag('div');
     }
-    
-    echo html_writer::end_tag('div');
-    echo html_writer::end_tag('div');
 }
 
 echo html_writer::end_tag('div');

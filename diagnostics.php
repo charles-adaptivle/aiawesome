@@ -46,7 +46,7 @@ echo '<div class="card-header"><h5>Plugin Status</h5></div>';
 echo '<div class="card-body">';
 echo '<table class="table table-bordered">';
 echo '<tr><td><strong>Plugin Enabled</strong></td><td>' . (get_config('local_aiawesome', 'enabled') ? '✅ Yes' : '❌ No') . '</td></tr>';
-echo '<tr><td><strong>Authentication Mode</strong></td><td>' . (get_config('local_aiawesome', 'auth_mode') ?: 'oauth') . '</td></tr>';
+echo '<tr><td><strong>AI Provider</strong></td><td>' . (get_config('local_aiawesome', 'ai_provider') ?: 'openai') . '</td></tr>';
 echo '<tr><td><strong>User Can Use</strong></td><td>' . ($can_use ? '✅ Yes' : '❌ No') . '</td></tr>';
 echo '<tr><td><strong>User ID</strong></td><td>' . $USER->id . '</td></tr>';
 echo '<tr><td><strong>User Roles</strong></td><td>';
@@ -65,20 +65,48 @@ echo '<div class="card mb-3">';
 echo '<div class="card-header"><h5>Configuration</h5></div>';
 echo '<div class="card-body">';
 
-if (get_config('local_aiawesome', 'auth_mode') === 'token') {
-    $api_key = get_config('local_aiawesome', 'openai_api_key');
-    echo '<table class="table table-bordered">';
-    echo '<tr><td><strong>OpenAI API Key</strong></td><td>' . (!empty($api_key) ? '✅ Set (' . substr($api_key, 0, 7) . '...)' : '❌ Not set') . '</td></tr>';
-    echo '<tr><td><strong>OpenAI Model</strong></td><td>' . (get_config('local_aiawesome', 'openai_model') ?: 'gpt-4o-mini') . '</td></tr>';
-    echo '<tr><td><strong>OpenAI API Base</strong></td><td>' . (get_config('local_aiawesome', 'openai_api_base') ?: 'https://api.openai.com/v1') . '</td></tr>';
-    echo '</table>';
-} else {
-    echo '<table class="table table-bordered">';
-    echo '<tr><td><strong>Base URL</strong></td><td>' . (get_config('local_aiawesome', 'base_url') ?: 'Not set') . '</td></tr>';
-    echo '<tr><td><strong>Client ID</strong></td><td>' . (!empty(get_config('local_aiawesome', 'client_id')) ? '✅ Set' : '❌ Not set') . '</td></tr>';
-    echo '<tr><td><strong>Client Secret</strong></td><td>' . (!empty(get_config('local_aiawesome', 'client_secret')) ? '✅ Set' : '❌ Not set') . '</td></tr>';
-    echo '</table>';
+$provider = get_config('local_aiawesome', 'ai_provider') ?: 'openai';
+
+echo '<table class="table table-bordered">';
+
+switch ($provider) {
+    case 'openai':
+        $api_key = get_config('local_aiawesome', 'openai_api_key');
+        $model = get_config('local_aiawesome', 'openai_model');
+        
+        echo '<tr><td><strong>Provider Type</strong></td><td>OpenAI Direct API</td></tr>';
+        echo '<tr><td><strong>OpenAI API Key</strong></td><td>' . (!empty($api_key) ? '✅ Set (' . substr($api_key, 0, 7) . '...)' : '❌ Not set') . '</td></tr>';
+        echo '<tr><td><strong>OpenAI Model</strong></td><td>' . ($model ?: 'gpt-4o-mini') . '</td></tr>';
+        break;
+        
+    case 'custom_oauth':
+        $base_url = get_config('local_aiawesome', 'oauth_base_url');
+        $client_id = get_config('local_aiawesome', 'oauth_client_id');
+        $client_secret = get_config('local_aiawesome', 'oauth_client_secret');
+        $token_url = get_config('local_aiawesome', 'oauth_token_url');
+        
+        echo '<tr><td><strong>Provider Type</strong></td><td>Custom OAuth Service</td></tr>';
+        echo '<tr><td><strong>Base URL</strong></td><td>' . ($base_url ?: 'Not set') . '</td></tr>';
+        echo '<tr><td><strong>Client ID</strong></td><td>' . (!empty($client_id) ? '✅ Set' : '❌ Not set') . '</td></tr>';
+        echo '<tr><td><strong>Client Secret</strong></td><td>' . (!empty($client_secret) ? '✅ Set' : '❌ Not set') . '</td></tr>';
+        echo '<tr><td><strong>Token URL</strong></td><td>' . ($token_url ?: 'Not set') . '</td></tr>';
+        break;
+        
+    case 'digitalocean':
+        $endpoint = get_config('local_aiawesome', 'digitalocean_endpoint');
+        $model = get_config('local_aiawesome', 'digitalocean_model');
+        
+        echo '<tr><td><strong>Provider Type</strong></td><td>DigitalOcean Custom Endpoint</td></tr>';
+        echo '<tr><td><strong>Endpoint URL</strong></td><td>' . ($endpoint ?: 'Not set') . '</td></tr>';
+        echo '<tr><td><strong>Model</strong></td><td>' . ($model ?: 'Not set') . '</td></tr>';
+        break;
+        
+    default:
+        echo '<tr><td><strong>Provider Type</strong></td><td>❌ Unknown provider: ' . $provider . '</td></tr>';
+        break;
 }
+
+echo '</table>';
 echo '</div>';
 echo '</div>';
 
@@ -91,7 +119,7 @@ echo '<table class="table table-bordered">';
 $files = [
     'CSS' => '/local/aiawesome/styles.css',
     'Boot JS' => '/local/aiawesome/amd/build/boot.js',
-    'App JS' => '/local/aiawesome/amd/build/app.js',
+    'App JS' => '/local/aiawesome/amd/build/simple_app.js',
     'SSE JS' => '/local/aiawesome/amd/build/sse.js',
 ];
 

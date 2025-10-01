@@ -41,31 +41,8 @@ $string['setting_enabled_desc'] = 'Enable the AI chat feature for users with app
 $string['setting_default_open'] = 'Default drawer state';
 $string['setting_default_open_desc'] = 'Open the AI chat drawer by default when users first access it.';
 
-$string['setting_auth_mode'] = 'Authentication Mode';
-$string['setting_auth_mode_desc'] = 'Choose how to authenticate with the AI service. OAuth for custom services, Token for OpenAI API.';
-$string['auth_mode_oauth'] = 'OAuth2 (Custom Service)';
-$string['auth_mode_token'] = 'API Token (OpenAI)';
-
-$string['setting_base_url'] = 'AI Service Base URL';
-$string['setting_base_url_desc'] = 'The base URL for your AI service API endpoint (for OAuth mode).';
-
-$string['setting_app_id'] = 'Application ID';
-$string['setting_app_id_desc'] = 'Your application identifier for the AI service (for OAuth mode).';
-
-$string['setting_token_url'] = 'OAuth2 Token URL';
-$string['setting_token_url_desc'] = 'The OAuth2 token endpoint for authentication (for OAuth mode).';
-
-$string['setting_client_id'] = 'OAuth2 Client ID';
-$string['setting_client_id_desc'] = 'Your OAuth2 client identifier (for OAuth mode).';
-
-$string['setting_client_secret'] = 'OAuth2 Client Secret';
-$string['setting_client_secret_desc'] = 'Your OAuth2 client secret (kept secure on server, for OAuth mode).';
-
 $string['setting_openai_api_key'] = 'OpenAI API Key';
 $string['setting_openai_api_key_desc'] = 'Your OpenAI API key. Keep this secure. Get yours at https://platform.openai.com/api-keys';
-
-$string['setting_openai_api_base'] = 'OpenAI API Base URL';
-$string['setting_openai_api_base_desc'] = 'The base URL for OpenAI API. Use default unless using a proxy or custom endpoint.';
 
 $string['setting_openai_model'] = 'OpenAI Model';
 $string['setting_openai_model_desc'] = 'The OpenAI model to use (e.g., gpt-4o-mini, gpt-4o, gpt-3.5-turbo).';

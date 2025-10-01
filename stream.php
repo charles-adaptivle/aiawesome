@@ -24,7 +24,8 @@
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header('Access-Control-Allow-Origin: https://ivan.dev.test'); // or '*'
+    // Use Moodle's configured domain for CORS.
+    header('Access-Control-Allow-Origin: ' . (isset($CFG) ? $CFG->wwwroot : '*'));
     header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Moodle-Sesskey');
     header('Access-Control-Allow-Methods: POST, OPTIONS');
     http_response_code(204);
@@ -41,7 +42,7 @@ use local_aiawesome\crypto_utils;
 use local_aiawesome\logging_service;
 
 // Add CORS headers for the actual request
-header('Access-Control-Allow-Origin: https://ivan.dev.test');
+header('Access-Control-Allow-Origin: ' . $CFG->wwwroot);
 header('Access-Control-Allow-Credentials: true');
 
 // Require login and capability.
