@@ -169,3 +169,7 @@ $string['digitalocean_test_failed'] = 'DigitalOcean connection test failed: {$a}
 $string['digitalocean_test_connectivity_failed'] = 'Cannot reach DigitalOcean endpoint. Please check the URL and ensure your droplet is running.';
 $string['digitalocean_test_auth_failed'] = 'Authentication failed. Please check your API key configuration.';
 $string['digitalocean_test_model_failed'] = 'Model "{$a}" is not available on your endpoint. Please check your model configuration.';
+
+// Admin navigation.
+$string['health_check'] = 'Health Check';
+$string['diagnostics'] = 'Diagnostics';

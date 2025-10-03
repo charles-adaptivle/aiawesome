@@ -24,8 +24,46 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Custom admin setting for rendering HTML navigation
+ */
+class admin_setting_aiawesome_navigation extends admin_setting {
+    
+    public function __construct() {
+        $this->nosave = true;
+        parent::__construct('local_aiawesome_navigation', '', '', '');
+    }
+    
+    public function get_setting() {
+        return true;
+    }
+    
+    public function write_setting($data) {
+        return '';
+    }
+    
+    public function output_html($data, $query = '') {
+        global $CFG;
+        
+        $navigation_html = '
+        <div class="alert alert-info mb-3">
+            <h5 class="mb-2">AI Awesome Administration</h5>
+            <div class="btn-group" role="group">
+                <span class="btn btn-primary btn-sm">⚙️ Settings</span>
+                <a href="' . $CFG->wwwroot . '/local/aiawesome/index.php" class="btn btn-outline-primary btn-sm">🔍 Health Check</a>
+                <a href="' . $CFG->wwwroot . '/local/aiawesome/diagnostics.php" class="btn btn-outline-primary btn-sm">🛠️ Diagnostics</a>
+            </div>
+        </div>';
+        
+        return format_admin_setting($this, '', $navigation_html, '', true, '', '', $query);
+    }
+}
+
 if ($hassiteconfig) {
     $settings = new admin_settingpage('local_aiawesome', get_string('pluginname', 'local_aiawesome'));
+
+    // Add custom navigation
+    $settings->add(new admin_setting_aiawesome_navigation());
 
     // General Settings.
     $settings->add(new admin_setting_heading(
@@ -354,5 +392,25 @@ if ($hassiteconfig) {
         PARAM_INT
     ));
 
-    $ADMIN->add('localplugins', $settings);
+    // Create an admin category for AI Awesome with multiple pages
+    $ADMIN->add('localplugins', new admin_category('local_aiawesome_category', get_string('pluginname', 'local_aiawesome')));
+    
+    // Add the main settings page
+    $ADMIN->add('local_aiawesome_category', $settings);
+    
+    // Add health check page link
+    $ADMIN->add('local_aiawesome_category', new admin_externalpage(
+        'local_aiawesome_health',
+        get_string('health_check', 'local_aiawesome'),
+        new moodle_url('/local/aiawesome/index.php'),
+        'moodle/site:config'
+    ));
+    
+    // Add diagnostics page link  
+    $ADMIN->add('local_aiawesome_category', new admin_externalpage(
+        'local_aiawesome_diagnostics',
+        get_string('diagnostics', 'local_aiawesome'),
+        new moodle_url('/local/aiawesome/diagnostics.php'),
+        'local/aiawesome:viewlogs'
+    ));
 }

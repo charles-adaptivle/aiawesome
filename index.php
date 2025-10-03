@@ -39,6 +39,28 @@ $PAGE->set_heading($SITE->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('pluginname', 'local_aiawesome') . ' Health Check');
 
+// Add navigation menu
+echo html_writer::start_tag('div', ['class' => 'alert alert-info']);
+echo html_writer::tag('h5', 'AI Awesome Administration', ['class' => 'mb-2']);
+echo html_writer::start_tag('div', ['class' => 'btn-group', 'role' => 'group']);
+echo html_writer::link(
+    new moodle_url('/admin/settings.php', ['section' => 'local_aiawesome']),
+    '⚙️ Settings',
+    ['class' => 'btn btn-outline-primary btn-sm']
+);
+echo html_writer::link(
+    new moodle_url('/local/aiawesome/index.php'),
+    '🔍 Health Check',
+    ['class' => 'btn btn-primary btn-sm']
+);
+echo html_writer::link(
+    new moodle_url('/local/aiawesome/diagnostics.php'),
+    '🛠️ Diagnostics',
+    ['class' => 'btn btn-outline-primary btn-sm']
+);
+echo html_writer::end_tag('div');
+echo html_writer::end_tag('div');
+
 // Check plugin configuration
 $config_ok = true;
 $issues = [];

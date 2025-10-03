@@ -1,4 +1,4 @@
-# AI Awesome - React Slide-Out AI Chat for Moodle
+# AI Awesome - React Slide-Out AI Chat for Moodle - DEV EDITION!!!
 
 A Moodle 4.5+ local plugin that adds a secure, React-powered AI chat interface accessible from any page. Features server-sent event streaming, OAuth2 authentication, encrypted context, and comprehensive privacy controls.
 

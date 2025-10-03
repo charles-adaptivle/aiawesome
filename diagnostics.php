@@ -40,6 +40,17 @@ $PAGE->requires->js_call_amd('local_aiawesome/boot', 'init');
 echo $OUTPUT->header();
 
 echo '<div class="container-fluid">';
+
+// Add navigation menu
+echo '<div class="alert alert-info">';
+echo '<h5 class="mb-2">AI Awesome Administration</h5>';
+echo '<div class="btn-group" role="group">';
+echo '<a href="' . new moodle_url('/admin/settings.php', ['section' => 'local_aiawesome']) . '" class="btn btn-outline-primary btn-sm">⚙️ Settings</a>';
+echo '<a href="' . new moodle_url('/local/aiawesome/index.php') . '" class="btn btn-outline-primary btn-sm">🔍 Health Check</a>';
+echo '<a href="' . new moodle_url('/local/aiawesome/diagnostics.php') . '" class="btn btn-primary btn-sm">🛠️ Diagnostics</a>';
+echo '</div>';
+echo '</div>';
+
 echo '<h2>AI Awesome Plugin Diagnostics</h2>';
 
 // Plugin status
