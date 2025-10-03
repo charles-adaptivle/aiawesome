@@ -27,35 +27,37 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Custom admin setting for rendering HTML navigation
  */
-class admin_setting_aiawesome_navigation extends admin_setting {
-    
-    public function __construct() {
-        $this->nosave = true;
-        parent::__construct('local_aiawesome_navigation', '', '', '');
-    }
-    
-    public function get_setting() {
-        return true;
-    }
-    
-    public function write_setting($data) {
-        return '';
-    }
-    
-    public function output_html($data, $query = '') {
-        global $CFG;
+if (!class_exists('admin_setting_aiawesome_navigation')) {
+    class admin_setting_aiawesome_navigation extends admin_setting {
         
-        $navigation_html = '
-        <div class="alert alert-info mb-3">
-            <h5 class="mb-2">AI Awesome Administration</h5>
-            <div class="btn-group" role="group">
-                <span class="btn btn-primary btn-sm">⚙️ Settings</span>
-                <a href="' . $CFG->wwwroot . '/local/aiawesome/index.php" class="btn btn-outline-primary btn-sm">🔍 Health Check</a>
-                <a href="' . $CFG->wwwroot . '/local/aiawesome/diagnostics.php" class="btn btn-outline-primary btn-sm">🛠️ Diagnostics</a>
-            </div>
-        </div>';
+        public function __construct() {
+            $this->nosave = true;
+            parent::__construct('local_aiawesome_navigation', '', '', '');
+        }
         
-        return format_admin_setting($this, '', $navigation_html, '', true, '', '', $query);
+        public function get_setting() {
+            return true;
+        }
+        
+        public function write_setting($data) {
+            return '';
+        }
+        
+        public function output_html($data, $query = '') {
+            global $CFG;
+            
+            $navigation_html = '
+            <div class="alert alert-info mb-3">
+                <h5 class="mb-2">AI Awesome Administration</h5>
+                <div class="btn-group" role="group">
+                    <span class="btn btn-primary btn-sm">⚙️ Settings</span>
+                    <a href="' . $CFG->wwwroot . '/local/aiawesome/index.php" class="btn btn-outline-primary btn-sm">🔍 Health Check</a>
+                    <a href="' . $CFG->wwwroot . '/local/aiawesome/diagnostics.php" class="btn btn-outline-primary btn-sm">🛠️ Diagnostics</a>
+                </div>
+            </div>';
+            
+            return format_admin_setting($this, '', $navigation_html, '', true, '', '', $query);
+        }
     }
 }
 
