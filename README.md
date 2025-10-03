@@ -347,6 +347,16 @@ The plugin uses Moodle's MUC for:
 - Code splitting: Separate bundles for boot, app, and SSE
 - Minimization: Production builds are minified and optimized
 
+## Additional Documentation
+
+For detailed technical documentation, implementation guides, and project history, see the **[project-status/](project-status/)** folder:
+
+- **[Features Documentation](project-status/features/)** - Detailed guides for implemented features (bouncing dots, loading skeleton, visual enhancements)
+- **[Implementation Guides](project-status/implementation/)** - Technical setup guides (DigitalOcean integration, model caching, project specification)
+- **[Project Archive](project-status/archive/)** - Historical documentation (phase completions, implementation plans, project status snapshots)
+
+Start with the **[Project Documentation Index](project-status/README.md)** for a complete overview.
+
 ## Contributing
 
 ### Code Standards
