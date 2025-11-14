@@ -68,6 +68,8 @@ class api_service {
                 return $this->get_custom_oauth_auth_header();
             case 'digitalocean':
                 return $this->get_digitalocean_auth_header();
+            case 'digitalocean_agent':
+                return $this->get_digitalocean_agent_auth_header();
             default:
                 debugging('AI Awesome: Unknown provider: ' . $this->provider, DEBUG_DEVELOPER);
                 return false;
@@ -116,6 +118,20 @@ class api_service {
     }
 
     /**
+     * Get DigitalOcean Agent Platform authorization header.
+     *
+     * @return string|false Authorization header value or false
+     */
+    private function get_digitalocean_agent_auth_header() {
+        $api_key = get_config('local_aiawesome', 'digitalocean_agent_api_key');
+        if (empty($api_key)) {
+            debugging('AI Awesome: DigitalOcean Agent API key not configured', DEBUG_DEVELOPER);
+            return false;
+        }
+        return 'Bearer ' . $api_key;
+    }
+
+    /**
      * Get API endpoint URL for chat completions.
      *
      * @return string|false API endpoint URL or false
@@ -128,6 +144,8 @@ class api_service {
                 return $this->get_custom_oauth_endpoint();
             case 'digitalocean':
                 return $this->get_digitalocean_endpoint();
+            case 'digitalocean_agent':
+                return $this->get_digitalocean_agent_endpoint();
             default:
                 debugging('AI Awesome: Unknown provider: ' . $this->provider, DEBUG_DEVELOPER);
                 return false;
@@ -179,6 +197,21 @@ class api_service {
     }
 
     /**
+     * Get DigitalOcean Agent Platform API endpoint.
+     *
+     * @return string|false API endpoint URL or false
+     */
+    private function get_digitalocean_agent_endpoint() {
+        $endpoint = get_config('local_aiawesome', 'digitalocean_agent_endpoint');
+        if (empty($endpoint)) {
+            debugging('AI Awesome: DigitalOcean Agent endpoint not configured', DEBUG_DEVELOPER);
+            return false;
+        }
+        // Agent Platform uses /api/v1/chat/completions path
+        return rtrim($endpoint, '/') . '/api/v1/chat/completions';
+    }
+
+    /**
      * Get additional headers needed for API requests.
      *
      * @return array Additional headers
@@ -193,6 +226,8 @@ class api_service {
                 return array_merge($headers, $this->get_custom_oauth_additional_headers());
             case 'digitalocean':
                 return array_merge($headers, $this->get_digitalocean_additional_headers());
+            case 'digitalocean_agent':
+                return array_merge($headers, $this->get_digitalocean_agent_additional_headers());
             default:
                 return $headers;
         }
@@ -257,6 +292,16 @@ class api_service {
     }
 
     /**
+     * Get DigitalOcean Agent Platform-specific additional headers.
+     *
+     * @return array Additional headers
+     */
+    private function get_digitalocean_agent_additional_headers() {
+        // Agent Platform uses standard bearer auth, no additional headers needed
+        return [];
+    }
+
+    /**
      * Prepare request payload for chat completion.
      *
      * @param string $message User message
@@ -271,6 +316,8 @@ class api_service {
                 return $this->prepare_custom_oauth_payload($message, $context);
             case 'digitalocean':
                 return $this->prepare_digitalocean_payload($message, $context);
+            case 'digitalocean_agent':
+                return $this->prepare_digitalocean_agent_payload($message, $context);
             default:
                 throw new \Exception('Unknown AI provider: ' . $this->provider);
         }
@@ -363,6 +410,45 @@ class api_service {
         
         return [
             'model' => $model,
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => $system_message
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $message
+                ]
+            ],
+            'max_tokens' => (int)$config->max_tokens,
+            'temperature' => (float)$config->temperature,
+            'stream' => true,
+        ];
+    }
+
+    /**
+     * Prepare DigitalOcean Agent Platform-specific request payload.
+     *
+     * @param string $message User message
+     * @param array $context Additional context information
+     * @return array Request payload
+     */
+    private function prepare_digitalocean_agent_payload($message, $context = []) {
+        $config = $this->get_chat_config();
+        
+        // DigitalOcean Agent Platform doesn't require a model field
+        // The agent has its model pre-configured
+        // Build context-aware system message
+        $system_message = 'You are a helpful AI assistant integrated into a Moodle learning management system. ';
+        if (!empty($context['courseName'])) {
+            $system_message .= 'The user is currently in the course: "' . $context['courseName'] . '". ';
+        }
+        if (!empty($context['userInfo']['fullname'])) {
+            $system_message .= 'The user\'s name is ' . $context['userInfo']['fullname'] . '. ';
+        }
+        $system_message .= 'Provide helpful, educational responses that are appropriate for the learning context.';
+        
+        return [
             'messages' => [
                 [
                     'role' => 'system',
@@ -487,8 +573,8 @@ class api_service {
     public function test_connection() {
         $test_payload = $this->prepare_chat_payload('Hello, this is a test message.');
         
-        // For testing, remove streaming for OpenAI and DigitalOcean providers.
-        if (in_array($this->provider, ['openai', 'digitalocean'])) {
+        // For testing, remove streaming for OpenAI, DigitalOcean, and DigitalOcean Agent providers.
+        if (in_array($this->provider, ['openai', 'digitalocean', 'digitalocean_agent'])) {
             $test_payload['stream'] = false;
             // Remove stream_options when not streaming (OpenAI requires this).
             unset($test_payload['stream_options']);

@@ -123,7 +123,8 @@ $string['cachedef_rate_limit_cache'] = 'Cache for tracking rate limits per user.
 // Provider selections.
 $string['provider_openai'] = 'OpenAI (Direct API)';
 $string['provider_custom_oauth'] = 'Custom OAuth Service';
-$string['provider_digitalocean'] = 'DigitalOcean (Custom Endpoint)';
+$string['provider_digitalocean'] = 'DigitalOcean (Direct Model)';
+$string['provider_digitalocean_agent'] = 'DigitalOcean Agent Platform';
 
 $string['setting_ai_provider'] = 'AI Provider';
 $string['setting_ai_provider_desc'] = 'Choose which AI provider to use for chat completions.';
@@ -148,8 +149,8 @@ $string['setting_oauth_app_id'] = 'Application ID';
 $string['setting_oauth_app_id_desc'] = 'Application identifier sent with requests to the custom service.';
 
 // DigitalOcean settings.
-$string['settings_header_digitalocean'] = 'DigitalOcean Configuration';
-$string['settings_header_digitalocean_desc'] = 'Configure your custom DigitalOcean-hosted AI model endpoint.';
+$string['settings_header_digitalocean'] = 'DigitalOcean Direct Model Configuration';
+$string['settings_header_digitalocean_desc'] = 'Configure your custom DigitalOcean-hosted AI model endpoint (direct model access).';
 
 $string['setting_digitalocean_endpoint'] = 'Endpoint URL';
 $string['setting_digitalocean_endpoint_desc'] = 'Full URL to your AI model endpoint (e.g., https://your-droplet.example.com/v1/chat/completions). Must support OpenAI-compatible API format.';
@@ -162,6 +163,19 @@ $string['setting_digitalocean_model_desc'] = 'Name of the AI model deployed on y
 
 $string['setting_digitalocean_headers'] = 'Custom Headers (Optional)';
 $string['setting_digitalocean_headers_desc'] = 'Additional HTTP headers to send with requests, one per line in "Header-Name: value" format. Use this for custom authentication or configuration requirements.';
+
+// DigitalOcean Agent Platform settings.
+$string['settings_header_digitalocean_agent'] = 'DigitalOcean Agent Platform Configuration';
+$string['settings_header_digitalocean_agent_desc'] = 'Configure your DigitalOcean Agent Platform endpoint (pre-configured AI agents with enhanced capabilities).';
+
+$string['setting_digitalocean_agent_endpoint'] = 'Agent Endpoint URL';
+$string['setting_digitalocean_agent_endpoint_desc'] = 'Full URL to your DigitalOcean agent endpoint (e.g., https://xxxxx.agents.do-ai.run).';
+
+$string['setting_digitalocean_agent_api_key'] = 'Agent API Key';
+$string['setting_digitalocean_agent_api_key_desc'] = 'API key for authenticating with your DigitalOcean agent.';
+
+$string['setting_digitalocean_agent_model'] = 'Agent Model';
+$string['setting_digitalocean_agent_model_desc'] = 'Model identifier for your agent (e.g., "OpenAI GPT-oss-120b"). This is provided by DigitalOcean when you create the agent.';
 
 // Connection test messages.
 $string['digitalocean_test_success'] = 'DigitalOcean connection test successful! Model: {$a->model}, Response time: {$a->response_time}ms';
